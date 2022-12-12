@@ -1,0 +1,38 @@
+{
+  "name": "smashdown",
+  "scripts": {
+    "dev": "solid-start dev",
+    "style": "prettier  --write \"src/**/*.{ts,tsx}\"",
+    "style:ci": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "build": "solid-start build",
+    "start": "solid-start start"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "@types/lodash": "^4.14.191",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.19",
+    "prettier": "^2.8.1",
+    "solid-start-node": "^0.2.0",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.8.4",
+    "vite": "^3.1.8"
+  },
+  "dependencies": {
+    "@solidjs/meta": "^0.28.0",
+    "@solidjs/router": "^0.5.0",
+    "classnames": "^2.3.2",
+    "date-fns": "^2.29.3",
+    "lodash": "^4.17.21",
+    "nanoid": "^4.0.0",
+    "solid-forms": "^0.4.6",
+    "solid-js": "^1.6.2",
+    "solid-start": "^0.2.0",
+    "store2": "^2.14.2",
+    "undici": "^5.11.0"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

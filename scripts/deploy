@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "${_dir}/common"
+. "${_dir}/terraform"
+
+# npm run build
+
+pushd "${_dir}/../infra"
+terraform_init
+terraform_apply
+popd
