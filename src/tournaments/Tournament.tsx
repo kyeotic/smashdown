@@ -15,7 +15,7 @@ import {
   getLostRoster,
   getNextFighter,
   hasFinished,
-} from './util'
+} from './model'
 import RosterSelect from './RosterSelect'
 import { getRandomFighter } from './roster'
 import { unwrap } from 'solid-js/store'

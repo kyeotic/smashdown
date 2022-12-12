@@ -1,9 +1,9 @@
 import { Show } from 'solid-js'
-import { useParams } from 'solid-start'
-import { H1 } from '../../components'
-import { useTournament } from '../../tournaments/store'
-import TournamentEdit from '../../tournaments/Tournament'
-import { Tournament } from '../../tournaments/types'
+import { H1 } from '../components'
+import { useTournament } from './store'
+import TournamentEdit from './Tournament'
+import { Tournament } from './types'
+import { useParams } from '@solidjs/router'
 
 export default function TournamentPage() {
   const { id } = useParams()

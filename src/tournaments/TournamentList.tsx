@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { LabelItem } from '../components'
 
 import type { Tournament } from './types'
-import { A } from 'solid-start'
+import { A } from '@solidjs/router'
 
 export default function TournamentList(props: {
   tournaments: Tournament[]

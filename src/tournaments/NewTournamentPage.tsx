@@ -4,14 +4,14 @@ import {
   createFormControl,
   createFormArray,
 } from 'solid-forms'
-import { Button, H1, H2 } from '../../components'
-import { TextInput } from '../../components/Forms'
-import { useNavigate } from 'solid-start'
-import { Tournament, TournamentPlayer } from '../../tournaments/types'
-import { init } from '../../tournaments/util'
+import { Button, H1, H2 } from '../components'
+import { TextInput } from '../components/Forms'
+import { useNavigate } from '@solidjs/router'
+import { Tournament, TournamentPlayer } from './types'
+import { init } from './model'
 
 import { nanoid } from 'nanoid'
-import db from '../../db/local'
+import db from '../db/local'
 
 interface TournamentForm {
   name: string

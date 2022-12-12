@@ -1,6 +1,6 @@
 import store from 'store2'
 import { Tournament } from '../tournaments/types'
-import { deserialize, serialize } from '../tournaments/util'
+import { deserialize, serialize } from '../tournaments/model'
 
 const TOURNAMENT_KEY = 'TS'
 const TOURNAMENT_NS = 'TS'

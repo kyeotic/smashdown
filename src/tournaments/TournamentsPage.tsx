@@ -1,5 +1,5 @@
 import { Show, type JSX } from 'solid-js'
-import { A } from 'solid-start'
+import { A } from '@solidjs/router'
 
 import { H1, buttonStyle, PageLoader } from '../components'
 import TournamentList from './tournamentList'
