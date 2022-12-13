@@ -4,6 +4,7 @@ module.exports = {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx,css,md,mdx,html,json,scss}',
   ],
+  safelist: [{ pattern: /grid-cols-.+/ }],
   darkMode: 'class',
   theme: {
     extend: {},

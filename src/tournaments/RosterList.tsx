@@ -3,28 +3,25 @@ import classnames from 'classnames'
 import { Fighter } from './types'
 import FighterCard from './FighterCard'
 
+const noopString = () => 'bg-slate-400'
+
 export default function RosterList(props: {
   roster: Fighter[]
-  lost?: Fighter[]
+  fighterClass?: (f: Fighter) => string
   onSelect?: (fighter: Fighter) => void
 }) {
-  const merged = mergeProps({ lost: [] }, props)
+  const merged = mergeProps({ fighterClass: noopString }, props)
 
   return (
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-4 gap-4 max-w-xl">
       <For each={props.roster}>
-        {(fighter) => {
-          const lost = merged.lost.some((l) => l.id === fighter.id)
-            ? 'bg-red-400'
-            : 'bg-slate-400'
-          return (
-            <FighterCard
-              fighter={fighter}
-              class={lost}
-              onClick={props.onSelect}
-            />
-          )
-        }}
+        {(fighter) => (
+          <FighterCard
+            class={merged.fighterClass(fighter)}
+            fighter={fighter}
+            onClick={props.onSelect}
+          />
+        )}
       </For>
     </div>
   )

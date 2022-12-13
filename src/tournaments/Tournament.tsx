@@ -11,6 +11,7 @@ import {
   type FinishedRound,
 } from './types'
 import {
+  isFinished,
   getFinishedRounds,
   getLostRoster,
   getNextFighter,
@@ -20,14 +21,13 @@ import RosterSelect from './RosterSelect'
 import { getRandomFighter } from './roster'
 import { unwrap } from 'solid-js/store'
 import FighterCard from './FighterCard'
-import classNames from 'classnames'
 
 export default function TournamentEdit(props: {
   tournament: Tournament
   onChange: (updated: Tournament) => void
 }): JSX.Element {
   return (
-    <div>
+    <div class="max-w-xl mx-auto">
       <H1>{props.tournament.name}</H1>
       <Switch>
         <Match when={!props.tournament?.startedOn}>
@@ -121,8 +121,8 @@ function RosterDraft(props: {
   }
 
   return (
-    <div>
-      <H2>{props.player.name}</H2>
+    <div class="mt-4">
+      <H2>{props.player.name}'s Roster</H2>
       <RosterList roster={props.player.roster} onSelect={removeFighter} />
       <Show when={props.player.roster.length < props.tournament.rosterSize}>
         <div class="flex gap-4 my-4">
@@ -152,27 +152,16 @@ function TournamentPlay(props: {
   onChange: (updated: Tournament) => void
 }): JSX.Element {
   return (
-    <div>
-      <H2>Round: {props.tournament.rounds.length}</H2>
+    <div class="mt-8">
+      <H2>Rounds</H2>
 
       <For each={props.tournament.rounds}>
         {(round) => (
-          <Switch>
-            <Match when={!(round as FinishedRound).finishedOn}>
-              <TournmentRound
-                round={round}
-                tournament={props.tournament}
-                onChange={props.onChange}
-              />
-            </Match>
-            <Match when={(round as FinishedRound).finishedOn}>
-              <TournmentFinishedRound
-                round={round as FinishedRound}
-                tournament={props.tournament}
-                onChange={props.onChange}
-              />
-            </Match>
-          </Switch>
+          <TournmentRound
+            round={round}
+            tournament={props.tournament}
+            onChange={props.onChange}
+          />
         )}
       </For>
 
@@ -184,11 +173,17 @@ function TournamentPlay(props: {
 
       <For each={props.tournament.players}>
         {(player) => {
-          const lost = () => getLostRoster(player, props.tournament)
+          function bg(f: Fighter): string {
+            return getLostRoster(player, props.tournament).some(
+              (l) => l.id === f.id,
+            )
+              ? 'bg-red-400'
+              : 'bg-slate-400'
+          }
           return (
             <>
-              <H3>{player.name}</H3>
-              <RosterList roster={player.roster} lost={lost()} />
+              <H3 class="mt-8">{player.name}'s Roster</H3>
+              <RosterList roster={player.roster} fighterClass={bg} />
             </>
           )
         }}
@@ -202,6 +197,12 @@ function TournmentRound(props: {
   tournament: Tournament
   onChange: (updated: Tournament) => void
 }): JSX.Element {
+  function onClick(player: Player) {
+    if (!isFinished(props.round)) {
+      selectWinner(player)
+    } else revert()
+  }
+
   function selectWinner(player: Player) {
     const rounds = props.tournament.rounds.slice(
       0,
@@ -237,28 +238,7 @@ function TournmentRound(props: {
       })
     }
   }
-  return (
-    <div class="flex gap-4">
-      <For each={props.round.players}>
-        {(player) => (
-          <div>
-            <span>{player.player.name}</span>
-            <FighterCard
-              fighter={player.fighter}
-              onClick={() => selectWinner(player.player)}
-            />
-          </div>
-        )}
-      </For>
-    </div>
-  )
-}
 
-function TournmentFinishedRound(props: {
-  round: FinishedRound
-  tournament: Tournament
-  onChange: (updated: Tournament) => void
-}): JSX.Element {
   function revert() {
     const finished = getFinishedRounds(props.tournament)
     const isPrevious = props.round === finished[finished.length - 1]
@@ -272,20 +252,29 @@ function TournmentFinishedRound(props: {
       ],
     })
   }
+
+  function getClass(player: Player) {
+    return (
+      (isFinished(props.round)
+        ? props.round.winner.id !== player.id
+          ? 'bg-red-400'
+          : 'bg-green-400'
+        : 'bg-slate-400') + ' flex-auto '
+    )
+  }
+
   return (
-    <div class="flex gap-4">
+    <div class={`grid grid-cols-${props.round.players.length} gap-4 mt-4`}>
       <For each={props.round.players}>
         {(player) => (
-          <div>
-            <span>{player.player.name}</span>
+          <div class="flex gap-0 flex-col">
+            <span class="flex-0 text-md lg:text-xl font-medium">
+              {player.player.name}
+            </span>
             <FighterCard
+              class={getClass(player.player)}
               fighter={player.fighter}
-              class={
-                props.round.winner.id !== player.player.id
-                  ? 'bg-red-400'
-                  : 'bg-green-400'
-              }
-              onClick={revert}
+              onClick={() => onClick(player.player)}
             />
           </div>
         )}

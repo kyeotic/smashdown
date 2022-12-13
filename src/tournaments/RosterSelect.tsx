@@ -51,7 +51,7 @@ export default function RosterSelect(props: {
     )
 
   return (
-    <div>
+    <div class="md:px-4">
       <Show when={selected().length}>
         <Label>Selected ({selected().length})</Label>
         <RosterList roster={selected()} onSelect={clear} />
@@ -69,7 +69,7 @@ export default function RosterSelect(props: {
         class="mb-4"
         oninput={(e) => setSearch(e.currentTarget.value)}
       />
-      <div class="grid grid-cols-4 gap-4">
+      <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
         <For each={filterFighters()}>
           {(fighter) => (
             <FighterCard

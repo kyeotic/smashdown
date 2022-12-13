@@ -115,6 +115,10 @@ export function deserialize(json: SerializedTournament): Tournament {
   })
 }
 
+export function isFinished(round: Round): round is FinishedRound {
+  return !!(round as FinishedRound).finishedOn
+}
+
 export function getFinishedRounds(t: Tournament): FinishedRound[] {
   return t.rounds.filter(
     (r) => (r as FinishedRound).finishedOn,

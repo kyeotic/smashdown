@@ -322,7 +322,7 @@ export const minMin: Fighter = {
 
 export const mrGameWatch: Fighter = {
   id: 'mrGameWatch',
-  name: 'Mr. Game & Watch',
+  name: 'Mr.\xa0Game & Watch',
   isMii: false,
   icon: 'mr-game-and-watch.png',
 }
@@ -343,7 +343,7 @@ export const olimar: Fighter = {
 
 export const pacMan: Fighter = {
   id: 'pacMan',
-  name: 'Pac-Man',
+  name: 'Pac\u2011Man',
   isMii: false,
   icon: 'pac-man.png',
 }
@@ -581,7 +581,7 @@ export const zelda: Fighter = {
 
 export const zeroSuitSamus: Fighter = {
   id: 'zeroSuitSamus',
-  name: 'Zero Suit Samus',
+  name: 'Zero\xa0Suit Samus',
   isMii: false,
   icon: 'zero-suit-samus.png',
 }
