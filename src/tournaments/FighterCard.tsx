@@ -1,12 +1,15 @@
 import { type JSX, mergeProps, createSignal, createEffect } from 'solid-js'
 import classnames from 'classnames'
 import { Fighter } from './types'
+import { max } from 'lodash'
 
 import { noop } from '../util/functions'
 import { fighters } from './roster'
 
-function useFit(name: string): number {
-  return (1 / (name.length / 1.6)) * 55 * (name.includes(' ') ? 2 : 1)
+function fitText(name: string): number {
+  const scale = name.includes(' ') ? 0.009 : 0.0078
+  const longestSegment = max(name.split(' ').map((l) => l.length))
+  return 1 / (Math.max(longestSegment!, 7) * scale)
 }
 
 export default function FighterCard(props: {
@@ -30,7 +33,7 @@ export default function FighterCard(props: {
     >
       <span
         ref={name}
-        style={{ 'font-size': useFit(props.fighter.name) + 'px' }}
+        style={{ 'font-size': fitText(props.fighter.name) + 'px' }}
         class={`text-center text-ellipsis basis-4 grow-0 shrink-0`}
       >
         {props.fighter.name}
