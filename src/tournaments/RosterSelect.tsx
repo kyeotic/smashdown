@@ -41,6 +41,14 @@ export default function RosterSelect(props: {
     props.onSubmit?.(selected())
   }
 
+  const filterFighters = () =>
+    filter(
+      fighters,
+      (f: Fighter) =>
+        (!search || f.name.toLowerCase().includes(search().toLowerCase())) &&
+        (props.hide?.every((_f) => _f.id !== f.id) ?? true),
+    )
+
   return (
     <div>
       <Show when={selected().length}>
@@ -61,15 +69,7 @@ export default function RosterSelect(props: {
         oninput={(e) => setSearch(e.currentTarget.value)}
       />
       <div class="grid grid-cols-4 gap-4">
-        <For
-          each={filter(
-            fighters,
-            (f: Fighter) =>
-              !search ||
-              (f.name.toLowerCase().includes(search().toLowerCase()) &&
-                (props.hide?.some((_f) => _f.id) ?? true)),
-          )}
-        >
+        <For each={filterFighters()}>
           {(fighter) => {
             return (
               <div
