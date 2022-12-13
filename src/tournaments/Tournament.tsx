@@ -27,7 +27,7 @@ export default function TournamentEdit(props: {
   onChange: (updated: Tournament) => void
 }): JSX.Element {
   return (
-    <div class="p4">
+    <div>
       <H1>{props.tournament.name}</H1>
       <Switch>
         <Match when={!props.tournament?.startedOn}>
@@ -283,7 +283,7 @@ function TournmentFinishedRound(props: {
               class={
                 props.round.winner.id !== player.player.id
                   ? 'bg-red-400'
-                  : undefined
+                  : 'bg-green-400'
               }
               onClick={revert}
             />

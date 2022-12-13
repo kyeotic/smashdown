@@ -13,10 +13,8 @@ export default function TournamentPage() {
     tournamentResource[1].mutate(updated)
   }
   return (
-    <div class="p-4">
-      <Show when={tournament()} fallback={<H1>Not Found</H1>}>
-        <TournamentEdit tournament={tournament()!} onChange={onChange} />
-      </Show>
-    </div>
+    <Show when={tournament()} fallback={<H1>Not Found</H1>}>
+      <TournamentEdit tournament={tournament()!} onChange={onChange} />
+    </Show>
   )
 }
