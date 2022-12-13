@@ -24,6 +24,7 @@
     "@solidjs/router": "^0.5.0",
     "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
+    "fitty": "^2.3.6",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.0",
     "solid-forms": "^0.4.6",
