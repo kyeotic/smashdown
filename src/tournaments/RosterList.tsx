@@ -14,10 +14,13 @@ export default function RosterList(props: {
     <div class="grid grid-cols-4 gap-4">
       <For each={props.roster}>
         {(fighter) => {
+          const lost = merged.lost.some((l) => l.id === fighter.id)
+            ? 'bg-red-400'
+            : 'bg-slate-400'
           return (
             <FighterCard
               fighter={fighter}
-              lost={merged.lost.some((l) => l.id === fighter.id)}
+              class={lost}
               onClick={props.onSelect}
             />
           )

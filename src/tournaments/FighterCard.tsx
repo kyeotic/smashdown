@@ -5,16 +5,19 @@ import { Fighter } from './types'
 import { noop } from '../util/functions'
 
 export default function FighterCard(props: {
+  class?: string
   fighter: Fighter
-  lost?: boolean
   onClick?: (f: Fighter) => void
 }): JSX.Element {
-  const merged = mergeProps({ onClick: noop, lost: false }, props)
+  const merged = mergeProps(
+    { onClick: noop, lost: false, class: 'bg-slate-400' },
+    props,
+  )
   return (
     <div
       class={classnames(
-        'p-2 rounded-md flex flex-col justify-center ',
-        props.lost ? 'bg-red-400' : 'bg-slate-400',
+        merged.class,
+        'p-2 rounded-md flex flex-col justify-center',
       )}
       onclick={[merged.onClick, props.fighter]}
     >

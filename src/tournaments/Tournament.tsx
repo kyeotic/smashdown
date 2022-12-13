@@ -20,6 +20,7 @@ import RosterSelect from './RosterSelect'
 import { getRandomFighter } from './roster'
 import { unwrap } from 'solid-js/store'
 import FighterCard from './FighterCard'
+import classNames from 'classnames'
 
 export default function TournamentEdit(props: {
   tournament: Tournament
@@ -279,7 +280,11 @@ function TournmentFinishedRound(props: {
             <span>{player.player.name}</span>
             <FighterCard
               fighter={player.fighter}
-              lost={props.round.winner.id !== player.player.id}
+              class={
+                props.round.winner.id !== player.player.id
+                  ? 'bg-red-400'
+                  : undefined
+              }
               onClick={revert}
             />
           </div>

@@ -3,6 +3,7 @@ import { without, filter } from 'lodash'
 import classnames from 'classnames'
 import { fighters } from './roster'
 import { Fighter } from './types'
+import FighterCard from './FighterCard'
 
 import { TextInput, Button, Label } from '../components'
 import RosterList from './RosterList'
@@ -70,26 +71,13 @@ export default function RosterSelect(props: {
       />
       <div class="grid grid-cols-4 gap-4">
         <For each={filterFighters()}>
-          {(fighter) => {
-            return (
-              <div
-                class={classnames(
-                  'p-2 rounded-md flex flex-col justify-center',
-                  isSelected(fighter) ? 'bg-cyan-400' : 'bg-slate-400',
-                )}
-                onclick={[toggle, fighter]}
-              >
-                <span class="text-center text-ellipsis basis-4 grow-0 shrink-0">
-                  {fighter.name}
-                </span>
-                <img
-                  class=""
-                  src={`/images/smash-logos/${fighter.icon}`}
-                  alt={fighter.name}
-                ></img>
-              </div>
-            )
-          }}
+          {(fighter) => (
+            <FighterCard
+              class={isSelected(fighter) ? 'bg-cyan-400' : 'bg-slate-400'}
+              fighter={fighter}
+              onClick={toggle}
+            />
+          )}
         </For>
       </div>
       <Button onclick={props.onCancel} class="mt-4">
