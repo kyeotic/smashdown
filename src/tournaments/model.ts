@@ -11,11 +11,7 @@ import { getFighter } from './roster'
 import { parseJSON } from 'date-fns'
 import { filter } from 'lodash'
 
-// function parseJSON(d) {
-//   return new Date(d)
-// }
-
-interface SerializedTournament {
+export interface SerializedTournament {
   id: string
   name: string
   createdOn: string
