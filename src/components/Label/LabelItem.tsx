@@ -10,16 +10,15 @@ export default function LabelItem(
   },
 ): JSX.Element {
   return (
-    <div>
+    <div class="flex gap-2 w-full mb-2">
       <label
-        class={classnames(
-          'block text-gray-700 text-sm font-bold mb-2',
-          props.labelClass,
-        )}
+        class={classnames('text-gray-700 text-sm font-bold', props.labelClass)}
       >
-        {props.children}
+        {props.label}
       </label>
-      <span class={props.textClass}>{props.text}</span>
+      <span class={classnames('text-gray-700 text-sm', props.textClass)}>
+        {props.text}
+      </span>
     </div>
   )
 }

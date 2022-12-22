@@ -11,17 +11,19 @@ import { getFighter } from './roster'
 import { parseJSON } from 'date-fns'
 import { filter } from 'lodash'
 
+export interface SerializedPlayer {
+  id: string
+  name: string
+  roster: string[]
+}
+
 export interface SerializedTournament {
   id: string
   name: string
   createdOn: string
   startedOn?: string
   rosterSize: number
-  players: Array<{
-    id: string
-    name: string
-    roster: string[]
-  }>
+  players: Array<SerializedPlayer>
   rounds: Array<{
     players: Array<{
       playerId: string
@@ -52,6 +54,7 @@ export function init(
     rounds: init.rounds ?? [],
     isComplete: init.isComplete ?? false,
     finishedOn: init.finishedOn,
+    winner: init.winner,
   }
 }
 
@@ -61,10 +64,10 @@ export function serialize(t: Tournament): SerializedTournament {
     name: t.name,
     createdOn: t.createdOn.toISOString(),
     startedOn: t.startedOn?.toISOString(),
+    finishedOn: t.finishedOn?.toISOString(),
     rosterSize: t.rosterSize,
     isComplete: t.isComplete,
     winnerId: t.winner?.id,
-    finishedOn: t.finishedOn?.toISOString(),
     players: t.players.map<SerializedTournament['players'][number]>((p) => ({
       id: p.id,
       name: p.name,
@@ -89,6 +92,7 @@ export function deserialize(json: SerializedTournament): Tournament {
     ...p,
     roster: p.roster.map(getFighter),
   }))
+  // function asPlayer()
   return init({
     id: json.id,
     name: json.name,
@@ -97,6 +101,10 @@ export function deserialize(json: SerializedTournament): Tournament {
     finishedOn: json.finishedOn ? parseJSON(json.finishedOn) : undefined,
     rosterSize: json.rosterSize,
     players,
+    isComplete: json.isComplete,
+    winner: json.winnerId
+      ? players.find((p) => p.id === json.winnerId)
+      : undefined,
     rounds: json.rounds.map<Round | FinishedRound>((r) => ({
       players: r.players.map<Round['players'][number]>((rr) => ({
         player: json.players.find((p) => p.id === rr.playerId)!,

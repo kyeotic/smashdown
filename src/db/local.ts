@@ -16,7 +16,7 @@ const initial = tournaments.get(TOURNAMENT_KEY)
 
 if (!initial) tournaments.set(TOURNAMENT_KEY, {})
 
-type DbTournaments = { [key: string]: SerializedTournament }
+export type DbTournaments = { [key: string]: SerializedTournament }
 
 const db = {
   tournaments: {

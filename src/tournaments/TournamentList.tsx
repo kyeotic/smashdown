@@ -31,6 +31,9 @@ export default function TournamentList(props: {
                   label="Created"
                   text={format(t.createdOn, 'dd MMMM yyyy')}
                 />
+                <Show when={t.winner}>
+                  <LabelItem label="Winner" text={t.winner!.name} />
+                </Show>
               </A>
             )
           }}
