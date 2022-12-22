@@ -37,7 +37,6 @@ export default function TournamentEdit(props: {
           <TournamentPlay {...props} />
         </Match>
       </Switch>
-      <pre>{JSON.stringify(props.tournament.winner, null, 2)}</pre>
     </div>
   )
 }

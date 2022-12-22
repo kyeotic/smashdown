@@ -4,7 +4,7 @@ import {
   createFormControl,
   createFormArray,
 } from 'solid-forms'
-import { Button, H1, H2 } from '../components'
+import { Button, buttonStyle, H1, H2, PageLoader } from '../components'
 import { TextInput } from '../components/Forms'
 import { useNavigate } from '@solidjs/router'
 import { Tournament, TournamentPlayer } from './types'
@@ -12,29 +12,52 @@ import { init } from './model'
 
 import { nanoid } from 'nanoid'
 import db from '../db/local'
+import { useTournaments } from './store'
+import { last } from 'lodash'
 
 interface TournamentForm {
   name: string
 }
 
-export default function NewTournament(): JSX.Element {
+export default function NewTournamentsPage(): JSX.Element {
+  const [tournaments, isLoading] = useTournaments()
+  return (
+    <div class="p-8">
+      <H1>New Tournament</H1>
+
+      <Show when={!isLoading()} fallback={<PageLoader />}>
+        <NewTournament previous={last(tournaments())} />
+      </Show>
+    </div>
+  )
+}
+
+export function NewTournament(props: { previous?: Tournament }): JSX.Element {
+  console.log('prev', props.previous)
   const navigate = useNavigate()
   const form = createFormGroup({
     name: createFormControl(''),
-    rosterSize: createFormControl('10', {
-      validators: [
-        (raw: string) => {
-          const val = parseFloat(raw)
-          if (Number.isNaN(val)) return { isNotNumber: 'Must be a number' }
-          if (!Number.isInteger(val))
-            return { isNotInteger: 'Must be an integer' }
-          if (val < 2 || val > 89)
-            return { outOfRange: 'Must be between 2 and 89' }
-          return null
-        },
-      ],
-    }),
-    players: createFormArray([createFormControl(''), createFormControl('')]),
+    rosterSize: createFormControl(
+      props.previous ? props.previous.rosterSize.toString() : '10',
+      {
+        validators: [
+          (raw: string) => {
+            const val = parseFloat(raw)
+            if (Number.isNaN(val)) return { isNotNumber: 'Must be a number' }
+            if (!Number.isInteger(val))
+              return { isNotInteger: 'Must be an integer' }
+            if (val < 2 || val > 89)
+              return { outOfRange: 'Must be between 2 and 89' }
+            return null
+          },
+        ],
+      },
+    ),
+    players: createFormArray(
+      props.previous
+        ? props.previous.players.map((p) => createFormControl(p.name))
+        : [createFormControl(''), createFormControl('')],
+    ),
   })
 
   async function submit(e: Event) {
@@ -69,8 +92,7 @@ export default function NewTournament(): JSX.Element {
   }
 
   return (
-    <form onsubmit={submit} class="p-8">
-      <H1>New Tournament</H1>
+    <form onsubmit={submit}>
       <TextInput label="Tournament Name" control={form.controls.name} />
       <TextInput
         label="Roster Size"

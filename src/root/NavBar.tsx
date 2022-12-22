@@ -4,8 +4,8 @@ export default function NavBar() {
   return (
     <nav
       class={`flex gap-1 h-8 w-full justify-center items-center
-      text-white shadow-inner shadow-2xl
-      bg-gradient-to-r from-cyan-500 to-blue-500
+      text-white drop-shadow-md
+      bg-gradient-to-r from-cyan-500 to-blue-500 py-1
     `}
     >
       <A href="/" class="contents">
@@ -14,7 +14,7 @@ export default function NavBar() {
           src="/apple-touch-icon.png"
           alt="home"
         />
-        <span class="flex-0 font-bold">Home</span>
+        <span class="flex-0 font-bold text-xl">Home</span>
       </A>
     </nav>
   )

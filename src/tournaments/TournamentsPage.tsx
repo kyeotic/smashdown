@@ -15,7 +15,7 @@ export default function TournamentsPage(): JSX.Element {
         Create New Tournament
       </A>
 
-      <Show when={isLoading} fallback={<PageLoader />}>
+      <Show when={!isLoading()} fallback={<PageLoader />}>
         <TournamentList tournaments={tournaments()} />
       </Show>
     </div>

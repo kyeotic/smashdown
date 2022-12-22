@@ -10,7 +10,7 @@ export function useTournaments() {
     return Object.values(tournaments)
   })
 
-  return [() => tournaments() ?? [], tournaments.loading] as const
+  return [() => tournaments() ?? [], () => tournaments.loading] as const
 }
 
 export function useTournament(id: string) {

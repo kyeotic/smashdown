@@ -32,14 +32,14 @@ export default function Root() {
   const Routes = useRoutes(routes)
   return (
     <ErrorBoundary fallback={(err) => err}>
-      <>
+      <div class="w-full flex flex-col min-h-screen max-h-screen">
         <NavBar />
-        <main class="w-full p-4 space-y-2 min-h-screen">
+        <main class="w-full max-h-full p-4 flex-grow overflow-scroll flex flex-col">
           <Routes />
         </main>
         <Footer />
         <div id={MODAL_ROOT_ID} />
-      </>
+      </div>
     </ErrorBoundary>
   )
 }
