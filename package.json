@@ -16,6 +16,7 @@
     "postcss": "^8.4.19",
     "prettier": "^2.8.1",
     "tailwindcss": "^3.2.4",
+    "tailwindcss-safe-area": "^0.2.2",
     "typescript": "^4.8.4",
     "vite": "^3.1.8",
     "vite-plugin-solid": "^2.5.0"
@@ -30,8 +31,7 @@
     "nanoid": "^4.0.0",
     "solid-forms": "^0.4.6",
     "solid-js": "^1.6.2",
-    "store2": "^2.14.2",
-    "tailwindcss-safe-area": "^0.2.2"
+    "store2": "^2.14.2"
   },
   "engines": {
     "node": ">=16"

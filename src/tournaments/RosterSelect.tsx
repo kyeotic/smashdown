@@ -26,7 +26,6 @@ export default function RosterSelect(props: {
   }
 
   function toggle(fighter: Fighter) {
-    console.log('toggling', fighter.name)
     if (!isSelected(fighter)) {
       setSelected([...selected(), fighter])
     } else {
@@ -51,38 +50,45 @@ export default function RosterSelect(props: {
     )
 
   return (
-    <div class="md:px-4">
-      <Show when={selected().length}>
-        <Label>Selected ({selected().length})</Label>
-        <RosterList roster={selected()} onSelect={clear} />
-        <div class="flex gap-4 justify-end mt-4">
-          <Button class="" onclick={() => clearAll()}>
-            Clear All
-          </Button>
-          <Button primary onclick={submit}>
-            Submit
+    <div class="md:px-4 max-h-screen flex flex-col">
+      <div class="overflow-scroll grow shrink-0 basis-auto">
+        <Show when={selected().length}>
+          <Label>Selected ({selected().length})</Label>
+          <RosterList roster={selected()} onSelect={clear} />
+          <div class="flex gap-4 justify-end mt-4">
+            <Button onclick={props.onCancel}>Cancel</Button>
+            <Button class="" onclick={() => clearAll()}>
+              Clear All
+            </Button>
+            <Button primary onclick={submit}>
+              Submit
+            </Button>
+          </div>
+        </Show>
+      </div>
+      <div class="overflow-scroll shrink basis-auto">
+        <TextInput
+          label="Search By Name"
+          class="mb-4"
+          oninput={(e) => setSearch(e.currentTarget.value)}
+        />
+        <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
+          <For each={filterFighters()}>
+            {(fighter) => (
+              <FighterCard
+                class={isSelected(fighter) ? 'bg-cyan-400' : 'bg-slate-400'}
+                fighter={fighter}
+                onClick={toggle}
+              />
+            )}
+          </For>
+        </div>
+        <div class="flex flex-row-reverse">
+          <Button onclick={props.onCancel} class="mt-4">
+            Cancel
           </Button>
         </div>
-      </Show>
-      <TextInput
-        label="Search By Name"
-        class="mb-4"
-        oninput={(e) => setSearch(e.currentTarget.value)}
-      />
-      <div class="grid grid-cols-4 lg:grid-cols-8 gap-4">
-        <For each={filterFighters()}>
-          {(fighter) => (
-            <FighterCard
-              class={isSelected(fighter) ? 'bg-cyan-400' : 'bg-slate-400'}
-              fighter={fighter}
-              onClick={toggle}
-            />
-          )}
-        </For>
       </div>
-      <Button onclick={props.onCancel} class="mt-4">
-        Cancel
-      </Button>
     </div>
   )
 }

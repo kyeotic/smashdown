@@ -1,11 +1,11 @@
 import { For, mergeProps, Show } from 'solid-js'
 import { noop } from '../util/functions'
 import { format } from 'date-fns'
+import { A } from '@solidjs/router'
 
 import { LabelItem } from '../components'
 
 import type { Tournament } from './types'
-import { A } from '@solidjs/router'
 
 export default function TournamentList(props: {
   tournaments: Tournament[]
@@ -18,7 +18,11 @@ export default function TournamentList(props: {
         <span class="mt-4">No Tournaments</span>
       </Show>
       <div class="flex flex-col gap-4 mt-4">
-        <For each={merged.tournaments}>
+        <For
+          each={merged.tournaments.sort(
+            (a, b) => b.createdOn.getTime() - a.createdOn.getTime(),
+          )}
+        >
           {(t) => {
             return (
               <A
