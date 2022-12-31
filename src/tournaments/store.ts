@@ -14,13 +14,9 @@ export function useTournaments() {
 }
 
 export function useTournament(id: string) {
-  return createResource(
-    id,
-    async (_id) => db.tournaments.get(_id).then((c) => (console.log(c), c)),
-    {
-      storage: createTournamentStorage,
-    },
-  )
+  return createResource(id, async (_id) => db.tournaments.get(_id), {
+    storage: createTournamentStorage,
+  })
 }
 
 function createTournamentStorage<T>(value: T): Signal<T> {

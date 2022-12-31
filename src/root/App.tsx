@@ -1,35 +1,15 @@
-import { ErrorBoundary } from 'solid-js'
+import { ErrorBoundary, onMount } from 'solid-js'
 import { MODAL_ROOT_ID } from '../components/Modal/Modal'
-import { Router, useRoutes, A } from '@solidjs/router'
+import { useRoutes } from '@solidjs/router'
 
 import NavBar from './NavBar'
 import Footer from './Footer'
-import NewTournament from '../tournaments/NewTournamentPage'
-import TournamentPage from '../tournaments/TournamentPage'
-import TournamentsPage from '../tournaments/TournamentsPage'
-import DataUtilities from '../db/DataUtilities'
-
-const routes = [
-  {
-    path: '/tournaments/new',
-    component: () => <NewTournament />,
-  },
-  {
-    path: '/tournaments/:id',
-    component: () => <TournamentPage />,
-  },
-  {
-    path: '/util',
-    component: () => <DataUtilities />,
-  },
-  {
-    path: '/',
-    component: () => <TournamentsPage />,
-  },
-]
+import { routes } from './routes'
+import { useTournamentInit } from '../tournaments/hooks'
 
 export default function Root() {
   const Routes = useRoutes(routes)
+  useTournamentInit()
   return (
     <ErrorBoundary fallback={(err) => err}>
       <div class="w-full flex flex-col min-h-screen max-h-screen">

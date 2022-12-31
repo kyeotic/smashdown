@@ -1,4 +1,12 @@
-import { Match, Switch, Show, For, type JSX, createSignal } from 'solid-js'
+import {
+  Match,
+  Switch,
+  Show,
+  For,
+  type JSX,
+  createSignal,
+  onMount,
+} from 'solid-js'
 import { filter, last, round, shuffle } from 'lodash'
 import { Button, H1, H2, TextInput, Modal, Label, H3 } from '../components'
 import RosterList from './RosterList'
@@ -21,6 +29,7 @@ import RosterSelect from './RosterSelect'
 import { getRandomFighter } from './roster'
 import { unwrap } from 'solid-js/store'
 import FighterCard from './FighterCard'
+import { scrollToCenter } from '../util/dom'
 
 export default function TournamentEdit(props: {
   tournament: Tournament
@@ -157,7 +166,7 @@ function TournamentPlay(props: {
 
       <For each={props.tournament.rounds}>
         {(round) => (
-          <TournmentRound
+          <TournamentRound
             round={round}
             tournament={props.tournament}
             onChange={props.onChange}
@@ -192,11 +201,23 @@ function TournamentPlay(props: {
   )
 }
 
-function TournmentRound(props: {
+function TournamentRound(props: {
   round: Round
   tournament: Tournament
   onChange: (updated: Tournament) => void
 }): JSX.Element {
+  let container: HTMLDivElement | undefined
+
+  onMount(() => {
+    if (
+      props.tournament.finishedOn ||
+      last(props.tournament.rounds) !== props.round
+    )
+      return
+    console.log('scrolling to', container)
+    setTimeout(() => scrollToCenter(container!, { smooth: true }), 50)
+  })
+
   function onClick(player: Player) {
     if (!isFinished(props.round)) {
       selectWinner(player)
@@ -264,7 +285,10 @@ function TournmentRound(props: {
   }
 
   return (
-    <div class={`grid grid-cols-${props.round.players.length} gap-4 mt-4`}>
+    <div
+      ref={container}
+      class={`grid grid-cols-${props.round.players.length} gap-4 mt-4`}
+    >
       <For each={props.round.players}>
         {(player) => (
           <div class="flex gap-0 flex-col">
