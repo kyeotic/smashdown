@@ -9,10 +9,11 @@ export function useTournamentInit() {
   const navigate = useNavigate()
   onMount(async () => {
     const dbTournaments = await db.tournaments.getAll()
-    const tournaments = orderBy(Object.values(dbTournaments), [
-      'createdOn',
-      'desc',
-    ])
+    const tournaments = orderBy(
+      Object.values(dbTournaments),
+      ['createdOn'],
+      ['desc'],
+    )
     const latest = first(tournaments)
     if (latest && !latest.finishedOn) {
       navigate(TOURNAMENT(latest.id))
