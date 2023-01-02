@@ -34,6 +34,7 @@ export default function TextInput(
       </Show>
       <input
         {...rest}
+        type={local.type}
         value={local.control.value}
         oninput={(e) => {
           local.control.setValue(e.currentTarget.value)

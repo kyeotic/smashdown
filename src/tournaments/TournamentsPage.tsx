@@ -3,7 +3,7 @@ import { A } from '@solidjs/router'
 
 import { H1, buttonStyle, PageLoader } from '../components'
 import TournamentList from './tournamentList'
-import { useTournaments } from './store'
+import { useTournaments } from './hooks'
 import { Tournament } from './types'
 
 export default function TournamentsPage(): JSX.Element {

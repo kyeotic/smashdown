@@ -12,7 +12,7 @@ import { init } from './model'
 
 import { nanoid } from 'nanoid'
 import db from '../db/local'
-import { useTournaments } from './store'
+import { useTournaments } from './hooks'
 import { last } from 'lodash'
 
 interface TournamentForm {
