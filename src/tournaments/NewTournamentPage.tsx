@@ -11,9 +11,9 @@ import { Tournament, TournamentPlayer } from './types'
 import { init } from './model'
 
 import { nanoid } from 'nanoid'
-import db from '../db/local'
 import { useTournaments } from './hooks'
 import { last } from 'lodash'
+import { useTournamentStore } from './context'
 
 interface TournamentForm {
   name: string
@@ -34,6 +34,7 @@ export default function NewTournamentsPage(): JSX.Element {
 
 export function NewTournament(props: { previous?: Tournament }): JSX.Element {
   console.log('prev', props.previous)
+  const store = useTournamentStore()
   const navigate = useNavigate()
   const form = createFormGroup({
     name: createFormControl(''),
@@ -78,9 +79,9 @@ export function NewTournament(props: { previous?: Tournament }): JSX.Element {
       players,
       rosterSize,
     })
-    await db.tournaments.save(tournament)
+    const created = await store.create(tournament)
 
-    navigate(`/tournaments/${tournament.id}`)
+    navigate(`/tournaments/${created.id}`)
   }
 
   function addPlayer() {

@@ -215,7 +215,7 @@ function TournamentRound(props: {
     )
       return
     console.log('scrolling to', container)
-    setTimeout(() => scrollToCenter(container!, { smooth: true }), 50)
+    setTimeout(() => scrollToCenter(container!, { smooth: false }), 100)
   })
 
   function onClick(player: Player) {

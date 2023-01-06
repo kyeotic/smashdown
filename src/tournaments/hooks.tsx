@@ -12,6 +12,7 @@ import { Tournament } from './types'
 import { TOURNAMENT } from '../root/routes'
 import { useTournamentStore } from './context'
 import db from '../db/local'
+import toast from 'solid-toast'
 
 //** App mount hook to load the latest unfinished tournament */
 export function useTournamentInit() {
@@ -43,8 +44,10 @@ export function useTournament(id: string) {
   )
 
   async function update(newValue: Tournament): Promise<void> {
-    await store.update(newValue)
     mutate(newValue)
+    store.update(newValue).catch((e) => {
+      toast.error(`Failed to update: ${e.message}`)
+    })
   }
 
   return [tournament, update] as const

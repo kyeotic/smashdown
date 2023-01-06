@@ -61,6 +61,8 @@ export class TournamentStore {
 
     tournament.id = data[0].id
 
+    await this.update(tournament)
+
     return tournament
   }
 
