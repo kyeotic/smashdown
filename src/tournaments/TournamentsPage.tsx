@@ -2,7 +2,7 @@ import { Show, type JSX } from 'solid-js'
 import { A } from '@solidjs/router'
 
 import { H1, buttonStyle, PageLoader } from '../components'
-import TournamentList from './tournamentList'
+import TournamentList from './TournamentList'
 import { useTournaments } from './hooks'
 import { Tournament } from './types'
 
