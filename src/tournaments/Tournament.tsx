@@ -284,6 +284,17 @@ function TournamentRound(props: {
     )
   }
 
+  function rosterIndex(player: {
+    player: Player
+    fighter: Fighter
+  }): JSX.Element {
+    const roster = props.tournament.players.find(
+      (p) => p.id == player.player.id,
+    )?.roster
+    if (!roster) throw new Error('Illegal player')
+    return roster.findIndex((r) => r.id === player.fighter.id)
+  }
+
   return (
     <div
       ref={container}
@@ -293,7 +304,7 @@ function TournamentRound(props: {
         {(player) => (
           <div class="flex gap-0 flex-col">
             <span class="flex-0 text-md lg:text-xl font-medium">
-              {player.player.name}
+              {player.player.name} ({rosterIndex(player)})
             </span>
             <FighterCard
               class={getClass(player.player)}
