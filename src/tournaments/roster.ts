@@ -1,5 +1,5 @@
 import type { Fighter, Player, Tournament, TournamentPlayer } from './types'
-import { filter } from 'lodash'
+import { filter, shuffle } from 'lodash'
 
 export const Random = {
   icon: 'random.png',
@@ -679,15 +679,15 @@ export function getFighter(id: string): Fighter {
 }
 
 export function getRandomFighter(denyList: Fighter[] = []): Fighter {
-  const pool = filter(fighters, (f) => !denyList.some((_f) => _f.id === f.id))
-  return pool[Math.floor(Math.random() * pool.length)]
+  return getRandomFighters(1, denyList)[0]
 }
 
-export function getLostRoster(
-  player: TournamentPlayer,
-  tournament: Tournament,
+export function getRandomFighters(
+  count: number,
+  denyList: Fighter[] = [],
 ): Fighter[] {
-  return filter(player.roster, (f) =>
-    tournament.finishedRounds.some((r) => r.losers),
+  const pool = shuffle(
+    filter(fighters, (f) => !denyList.some((_f) => _f.id === f.id)),
   )
+  return pool.slice(0, count)
 }

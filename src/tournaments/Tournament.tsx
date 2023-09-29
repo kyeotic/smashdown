@@ -26,7 +26,7 @@ import {
   hasFinished,
 } from './model'
 import RosterSelect from './RosterSelect'
-import { getRandomFighter } from './roster'
+import { getRandomFighter, getRandomFighters } from './roster'
 import { unwrap } from 'solid-js/store'
 import FighterCard from './FighterCard'
 import { scrollToCenter } from '../util/dom'
@@ -128,6 +128,13 @@ function RosterDraft(props: {
   function addRandom() {
     addFighters([getRandomFighter(unwrap(props.player.roster))])
   }
+  function fillRandom() {
+    addFighters(
+      getRandomFighters(
+        props.tournament.rosterSize - props.player.roster.length,
+      ),
+    )
+  }
 
   return (
     <div class="mt-4">
@@ -136,6 +143,7 @@ function RosterDraft(props: {
       <Show when={props.player.roster.length < props.tournament.rosterSize}>
         <div class="flex gap-4 my-4">
           <Button onclick={addRandom}>➕ Add Random</Button>
+          <Button onclick={fillRandom}>🪣 Fill Random</Button>
           <Button onclick={() => setShow(true)} primary>
             ➕ Pick
           </Button>
@@ -292,7 +300,7 @@ function TournamentRound(props: {
       (p) => p.id == player.player.id,
     )?.roster
     if (!roster) throw new Error('Illegal player')
-    return roster.findIndex((r) => r.id === player.fighter.id)
+    return roster.findIndex((r) => r.id === player.fighter.id) + 1
   }
 
   return (
