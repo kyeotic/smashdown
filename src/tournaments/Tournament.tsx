@@ -312,7 +312,8 @@ function TournamentRound(props: {
         {(player) => (
           <div class="flex gap-0 flex-col">
             <span class="flex-0 text-md lg:text-xl font-medium">
-              {player.player.name} ({rosterIndex(player)})
+              {player.player.name} ({rosterIndex(player)}/
+              {props.tournament.rosterSize})
             </span>
             <FighterCard
               class={getClass(player.player)}
