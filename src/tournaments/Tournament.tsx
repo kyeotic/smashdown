@@ -132,6 +132,7 @@ function RosterDraft(props: {
     addFighters(
       getRandomFighters(
         props.tournament.rosterSize - props.player.roster.length,
+        unwrap(props.player.roster),
       ),
     )
   }
