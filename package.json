@@ -4,7 +4,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "gen:types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" > src/database.types.ts",
+    "gen:types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" > src/db/schema.ts",
     "deploy": "npm run build && ./scripts/client",
     "style": "prettier  --write \"src/**/*.{ts,tsx}\"",
     "style:ci": "prettier --check \"src/**/*.{ts,tsx}\""
@@ -26,6 +26,7 @@
   "dependencies": {
     "@solidjs/router": "^0.8.2",
     "@supabase/supabase-js": "^2.2.3",
+    "@thisbeyond/solid-select": "^0.15.0",
     "classnames": "^2.3.2",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^2.29.3",

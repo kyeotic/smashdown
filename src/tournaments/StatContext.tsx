@@ -42,22 +42,12 @@ export function StatProvider(
   props: ParentProps & { tournament: Tournament },
 ): JSX.Element {
   const [tournaments, isLoading] = useTournaments()
-
-  /*
-    This is all a hack on ID/name because playesrs are currently
-    freshly created (new ID) for each tournament
-    making correlation only possible using the name
-
-
-    TODO(tkye) - create real players so they have the same ID cross tournament
-  */
-
   const ctxStats = createMemo(() => {
     if (isLoading()) return null
 
     const playersStats = props.tournament.players.reduce((players, p) => {
-      players[p.name] = {
-        id: p.name,
+      players[p.id] = {
+        id: p.id,
         record: p.roster.reduce((stats, fighter) => {
           stats[fighter.id] = {
             games: 0,
@@ -68,14 +58,14 @@ export function StatProvider(
       }
       return players
     }, {} as { [playerId: string]: PlayerStats })
-    const playerIds = props.tournament.players.map((p) => p.name)
+    const playerIds = props.tournament.players.map((p) => p.id)
 
     console.log('roster stats', playersStats)
     console.log('all touns', tournaments(), playerIds)
 
     tournaments().forEach((tournament) => {
       console.log('stats tourn', tournament.id)
-      if (!tournament.players.some((p) => playerIds.includes(p.name))) return
+      if (!tournament.players.some((p) => playerIds.includes(p.id))) return
 
       const finishedRounds = tournament.rounds.filter(
         (r) => !!(r as FinishedRound).finishedOn,
@@ -84,17 +74,17 @@ export function StatProvider(
       for (let round of finishedRounds) {
         round.losers.forEach((l) => {
           const fighter = round.players.find((p) => p.player.id == l.id)!
-          if (!playersStats[l.name]?.record[fighter?.fighter.id]) {
+          if (!playersStats[l.id]?.record[fighter?.fighter.id]) {
             return
           }
-          playersStats[l.name].record[fighter?.fighter.id].games++
+          playersStats[l.id].record[fighter?.fighter.id].games++
         })
 
-        if (!playersStats[round.winner.name]) continue
+        if (!playersStats[round.winner.id]) continue
         const fighter = round.players.find(
           (p) => p.player.id == round.winner.id,
         )!
-        const stat = playersStats[round.winner.name].record[fighter?.fighter.id]
+        const stat = playersStats[round.winner.id].record[fighter?.fighter.id]
         if (!stat) continue
         stat.games++
         stat.wins++

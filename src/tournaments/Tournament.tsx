@@ -312,7 +312,7 @@ function TournamentRound(props: {
   const players = createMemo(() =>
     props.round.players.map((p) => ({
       ...p,
-      stats: ctxStats()?.[p.player.name]?.record[p.fighter.id],
+      stats: ctxStats()?.[p.player.id]?.record[p.fighter.id],
     })),
   )
 

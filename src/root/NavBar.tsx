@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router'
-import { USER_SECURITY } from './routes'
+import { PLAYERS, USER_SECURITY, UTIL } from './routes'
 
 export default function NavBar() {
   return (
@@ -19,10 +19,19 @@ export default function NavBar() {
         />
         <span class="flex-0 font-bold text-xl">Home</span>
       </A>
-      <A href={USER_SECURITY}>
-        <i class="fa-solid fa-user pr-2" />
-        <span class="flex-0 font-bold">Profile</span>
-      </A>
+
+      <div class="flex gap-4">
+        {/* <A href={UTIL}>
+          <span class="flex-0 font-bold">Util</span>
+        </A> */}
+        <A href={PLAYERS}>
+          <span class="flex-0 font-bold">Players</span>
+        </A>
+        <A href={USER_SECURITY}>
+          <i class="fa-solid fa-user pr-2" />
+          <span class="flex-0 font-bold">Profile</span>
+        </A>
+      </div>
     </nav>
   )
 }

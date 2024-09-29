@@ -9,6 +9,7 @@ import { routes } from './routes'
 import { useTournamentInit } from '../tournaments/hooks'
 import { TournamentStoreProvider } from '../tournaments/context'
 import Footer from './Footer'
+import { PlayerStoreProvider } from '../players/context'
 
 export default function Root() {
   const Routes = useRoutes(routes)
@@ -18,10 +19,12 @@ export default function Root() {
         <NavBar />
         <main class="w-full max-h-full p-4 flex-grow overflow-scroll flex flex-col">
           <Auth>
-            <TournamentStoreProvider>
-              <Init />
-              <Routes />
-            </TournamentStoreProvider>
+            <PlayerStoreProvider>
+              <TournamentStoreProvider>
+                <Init />
+                <Routes />
+              </TournamentStoreProvider>
+            </PlayerStoreProvider>
           </Auth>
         </main>
         {/* <Footer /> */}

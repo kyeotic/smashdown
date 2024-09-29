@@ -1,19 +1,20 @@
-import { Show, mergeProps, createEffect, type JSX, For } from 'solid-js'
-import {
-  createFormGroup,
-  createFormControl,
-  createFormArray,
-} from 'solid-forms'
-import { Button, buttonStyle, H1, H2, PageLoader } from '../components'
-import { TextInput } from '../components/Forms'
+import { Show, type JSX, createSignal, createMemo } from 'solid-js'
+import { createFormGroup, createFormControl } from 'solid-forms'
 import { useNavigate } from '@solidjs/router'
-import { Tournament, TournamentPlayer } from './types'
+
+import { Select, createOptions } from '@thisbeyond/solid-select'
+
+import { Button, H1, Label, PageLoader } from '../components'
+import { TextInput } from '../components/Forms'
+import { Player, Tournament, TournamentPlayer } from './types'
 import { init } from './model'
 
-import { nanoid } from 'nanoid'
 import { useTournaments } from './hooks'
 import { last } from 'lodash'
 import { useTournamentStore } from './context'
+import { usePlayerStore } from '../players/context'
+
+import '@thisbeyond/solid-select/style.css'
 
 interface TournamentForm {
   name: string
@@ -34,6 +35,19 @@ export default function NewTournamentsPage(): JSX.Element {
 
 export function NewTournament(props: { previous?: Tournament }): JSX.Element {
   console.log('prev', props.previous)
+  const playerStore = usePlayerStore()
+  const [selectedPlayers, setPlayers] = createSignal<Player[]>(
+    props.previous?.players?.map((p) => ({
+      id: p.id,
+      name: p.name,
+    })) ?? [],
+  )
+  const availablePlayers = createMemo(() =>
+    playerStore.players
+      .filter((p) => !selectedPlayers().some((sp) => sp.id === p.id))
+      .map((p) => ({ id: p.id, name: p.name })),
+  )
+
   const store = useTournamentStore()
   const navigate = useNavigate()
   const form = createFormGroup({
@@ -54,22 +68,17 @@ export function NewTournament(props: { previous?: Tournament }): JSX.Element {
         ],
       },
     ),
-    players: createFormArray(
-      props.previous
-        ? props.previous.players.map((p) => createFormControl(p.name))
-        : [createFormControl(''), createFormControl('')],
-    ),
   })
 
   async function submit(e: Event) {
     e.preventDefault()
     const name = form.value.name!
     const rosterSize = parseFloat(form.value.rosterSize!)
-    const players = [...(form.value.players?.values() ?? [])].map(
+    const players = selectedPlayers().map(
       (t) =>
         ({
-          name: t,
-          id: nanoid(),
+          id: t.id,
+          name: t.name,
           roster: [],
         } as TournamentPlayer),
     )
@@ -84,12 +93,16 @@ export function NewTournament(props: { previous?: Tournament }): JSX.Element {
     navigate(`/tournaments/${created.id}`)
   }
 
-  function addPlayer() {
-    form.controls.players.push(createFormControl(''))
-  }
+  const selectProps = createOptions(availablePlayers, {
+    // key: 'name',
+    format: (item, type) => {
+      console.log('formatting', item.name)
+      return item.name
+    },
+  })
 
-  function removePlayer(index: number) {
-    form.controls.players.removeControl(index)
+  function handlePlayer(p: Player) {
+    console.log('handle', p)
   }
 
   return (
@@ -102,30 +115,15 @@ export function NewTournament(props: { previous?: Tournament }): JSX.Element {
       />
 
       <div class="my-4 flex">
-        <H2 class="flex-auto">Players</H2>
-        <Button onclick={addPlayer} primary class="flex-none">
-          ➕ Add Player
-        </Button>
+        <Label>Players</Label>
       </div>
-      <For each={form.controls.players.controls}>
-        {(player, index) => (
-          <div class="flex gap-4">
-            <TextInput
-              label="Player Name"
-              name={index().toString()}
-              control={player}
-              class="flex-auto"
-            />
-            <Button
-              onclick={[removePlayer, index()]}
-              class="flex-none mt-7 mb-2"
-            >
-              ❌
-            </Button>
-          </div>
-        )}
-      </For>
-      <Button type="submit" primary>
+      <Select
+        onChange={setPlayers}
+        multiple
+        initialValue={selectedPlayers()}
+        {...selectProps}
+      />
+      <Button type="submit" primary class="mt-2">
         Create
       </Button>
     </form>
