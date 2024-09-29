@@ -6,6 +6,7 @@ import {
   type JSX,
   createSignal,
   onMount,
+  createMemo,
 } from 'solid-js'
 import { filter, last, round, shuffle } from 'lodash'
 import { Button, H1, H2, TextInput, Modal, Label, H3 } from '../components'
@@ -30,6 +31,7 @@ import { getRandomFighter, getRandomFighters } from './roster'
 import { unwrap } from 'solid-js/store'
 import FighterCard from './FighterCard'
 import { scrollToCenter } from '../util/dom'
+import { StatProvider, useStatContext } from './StatContext'
 
 export default function TournamentEdit(props: {
   tournament: Tournament
@@ -170,43 +172,45 @@ function TournamentPlay(props: {
   onChange: (updated: Tournament) => void
 }): JSX.Element {
   return (
-    <div class="mt-8">
-      <H2>Rounds</H2>
+    <StatProvider tournament={props.tournament}>
+      <div class="mt-8">
+        <H2>Rounds</H2>
 
-      <For each={props.tournament.rounds}>
-        {(round) => (
-          <TournamentRound
-            round={round}
-            tournament={props.tournament}
-            onChange={props.onChange}
-          />
-        )}
-      </For>
+        <For each={props.tournament.rounds}>
+          {(round) => (
+            <TournamentRound
+              round={round}
+              tournament={props.tournament}
+              onChange={props.onChange}
+            />
+          )}
+        </For>
 
-      <Show when={hasFinished(props.tournament)}>
-        <>
-          <H2>Winner: {props.tournament.winner?.name}</H2>
-        </>
-      </Show>
+        <Show when={hasFinished(props.tournament)}>
+          <>
+            <H2>Winner: {props.tournament.winner?.name}</H2>
+          </>
+        </Show>
 
-      <For each={props.tournament.players}>
-        {(player) => {
-          function bg(f: Fighter): string {
-            return getLostRoster(player, props.tournament).some(
-              (l) => l.id === f.id,
+        <For each={props.tournament.players}>
+          {(player) => {
+            function bg(f: Fighter): string {
+              return getLostRoster(player, props.tournament).some(
+                (l) => l.id === f.id,
+              )
+                ? 'bg-red-400'
+                : 'bg-slate-400'
+            }
+            return (
+              <>
+                <H3 class="mt-8">{player.name}'s Roster</H3>
+                <RosterList roster={player.roster} fighterClass={bg} />
+              </>
             )
-              ? 'bg-red-400'
-              : 'bg-slate-400'
-          }
-          return (
-            <>
-              <H3 class="mt-8">{player.name}'s Roster</H3>
-              <RosterList roster={player.roster} fighterClass={bg} />
-            </>
-          )
-        }}
-      </For>
-    </div>
+          }}
+        </For>
+      </div>
+    </StatProvider>
   )
 }
 
@@ -216,6 +220,7 @@ function TournamentRound(props: {
   onChange: (updated: Tournament) => void
 }): JSX.Element {
   let container: HTMLDivElement | undefined
+  const ctxStats = useStatContext()
 
   onMount(() => {
     if (
@@ -223,7 +228,7 @@ function TournamentRound(props: {
       last(props.tournament.rounds) !== props.round
     )
       return
-    console.log('scrolling to', container)
+    // console.log('scrolling to', container)
     setTimeout(() => scrollToCenter(container!, { smooth: false }), 100)
   })
 
@@ -304,25 +309,42 @@ function TournamentRound(props: {
     return roster.findIndex((r) => r.id === player.fighter.id) + 1
   }
 
+  const players = createMemo(() =>
+    props.round.players.map((p) => ({
+      ...p,
+      stats: ctxStats()?.[p.player.name]?.record[p.fighter.id],
+    })),
+  )
+
   return (
     <div
       ref={container}
       class={`grid grid-cols-${props.round.players.length} gap-4 mt-4`}
     >
-      <For each={props.round.players}>
-        {(player) => (
-          <div class="flex gap-0 flex-col">
-            <span class="flex-0 text-md lg:text-xl font-medium">
-              {player.player.name} ({rosterIndex(player)}/
-              {props.tournament.rosterSize})
-            </span>
-            <FighterCard
-              class={getClass(player.player)}
-              fighter={player.fighter}
-              onClick={() => onClick(player.player)}
-            />
-          </div>
-        )}
+      <For each={players()}>
+        {(player) => {
+          return (
+            <div class="flex gap-0 flex-col">
+              <span class="flex-0 text-md lg:text-xl font-medium">
+                {player.player.name} ({rosterIndex(player)}/
+                {props.tournament.rosterSize})
+              </span>
+              <FighterCard
+                class={getClass(player.player)}
+                fighter={player.fighter}
+                onClick={() => onClick(player.player)}
+              />
+              <Show when={player.stats}>
+                {(s) => (
+                  <span class="flex-0 text-md lg:text-xl font-medium">
+                    {s()?.wins}/{s()?.games} (
+                    {((s()?.wins / s()?.games) * 100).toFixed(2)}%)
+                  </span>
+                )}
+              </Show>
+            </div>
+          )
+        }}
       </For>
     </div>
   )
