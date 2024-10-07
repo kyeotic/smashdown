@@ -5,15 +5,19 @@ import {
   JSX,
   Accessor,
   createMemo,
+  createSignal,
+  createEffect,
 } from 'solid-js'
 import { useTournaments } from './hooks'
-import { Fighter, FinishedRound, Player, Tournament } from './types'
-import { round } from 'lodash'
+import { FinishedRound, Tournament } from './types'
+import { createStore, produce } from 'solid-js/store'
+import { useTournamentStore } from './context'
 
 export interface FighterStats {
   games: number
   wins: number
 }
+
 export interface PlayerStats {
   id: string
   record: {
@@ -21,13 +25,13 @@ export interface PlayerStats {
   }
 }
 
-export type TournamentStats = Accessor<{
+export interface TournamentStats {
   [playerId: string]: PlayerStats
-} | null>
+}
 
-export const StatProviderContext = createContext<TournamentStats>()
+export const StatProviderContext = createContext<Accessor<TournamentStats>>()
 
-export function useStatContext(): TournamentStats {
+export function useStatContext(): Accessor<TournamentStats> {
   const ctx = useContext(StatProviderContext)
 
   if (!ctx)
@@ -41,9 +45,10 @@ export function useStatContext(): TournamentStats {
 export function StatProvider(
   props: ParentProps & { tournament: Tournament },
 ): JSX.Element {
-  const [tournaments, isLoading] = useTournaments()
-  const ctxStats = createMemo(() => {
-    if (isLoading()) return null
+  const store = useTournamentStore()
+
+  const ctx = createMemo<TournamentStats>(() => {
+    if (store.isLoading) return {}
 
     const playersStats = props.tournament.players.reduce((players, p) => {
       players[p.id] = {
@@ -60,11 +65,7 @@ export function StatProvider(
     }, {} as { [playerId: string]: PlayerStats })
     const playerIds = props.tournament.players.map((p) => p.id)
 
-    console.log('roster stats', playersStats)
-    console.log('all touns', tournaments(), playerIds)
-
-    tournaments().forEach((tournament) => {
-      console.log('stats tourn', tournament.id)
+    store.tournaments.forEach((tournament) => {
       if (!tournament.players.some((p) => playerIds.includes(p.id))) return
 
       const finishedRounds = tournament.rounds.filter(
@@ -91,13 +92,11 @@ export function StatProvider(
       }
     })
 
-    console.log('player sats', playersStats)
-
     return playersStats
   })
 
   return (
-    <StatProviderContext.Provider value={ctxStats}>
+    <StatProviderContext.Provider value={ctx}>
       {props.children}
     </StatProviderContext.Provider>
   )

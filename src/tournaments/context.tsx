@@ -1,6 +1,6 @@
 import { createContext, type ParentProps, useContext, JSX } from 'solid-js'
-import { useAuth, useSupabase } from '../auth/SupabaseProvider'
 import { TournamentStore } from './store'
+import { useTournamentDb } from './db'
 
 export const TournamentStoreContext = createContext<TournamentStore>()
 
@@ -16,9 +16,8 @@ export function useTournamentStore(): TournamentStore {
 }
 
 export function TournamentStoreProvider(props: ParentProps): JSX.Element {
-  const supabase = useSupabase()
-  const auth = useAuth()
-  const store = new TournamentStore(supabase, auth)
+  const db = useTournamentDb()
+  const store = new TournamentStore(db)
 
   return (
     <TournamentStoreContext.Provider value={store}>

@@ -1,18 +1,18 @@
-import { ErrorBoundary, JSX } from 'solid-js'
+import { ErrorBoundary, JSX, onMount } from 'solid-js'
 import { MODAL_ROOT_ID } from '../components/Modal/Modal'
-import { useRoutes } from '@solidjs/router'
+import { useNavigate, useRoutes } from '@solidjs/router'
 import { Toaster } from 'solid-toast'
 
 import NavBar from './NavBar'
 import Auth from '../auth/Auth'
-import { routes } from './routes'
-import { useTournamentInit } from '../tournaments/hooks'
+import { routes, TOURNAMENT } from './routes'
 import { TournamentStoreProvider } from '../tournaments/context'
-import Footer from './Footer'
 import { PlayerStoreProvider } from '../players/context'
+import { TournamentDbProvider, useTournamentDb } from '../tournaments/db'
 
 export default function Root() {
   const Routes = useRoutes(routes)
+
   return (
     <ErrorBoundary fallback={(err) => err}>
       <div class="w-full flex flex-col min-h-screen max-h-screen">
@@ -20,10 +20,12 @@ export default function Root() {
         <main class="w-full max-h-full p-4 flex-grow overflow-scroll flex flex-col">
           <Auth>
             <PlayerStoreProvider>
-              <TournamentStoreProvider>
-                <Init />
-                <Routes />
-              </TournamentStoreProvider>
+              <TournamentDbProvider>
+                <TournamentStoreProvider>
+                  <Init />
+                  <Routes />
+                </TournamentStoreProvider>
+              </TournamentDbProvider>
             </PlayerStoreProvider>
           </Auth>
         </main>
@@ -38,4 +40,18 @@ export default function Root() {
 function Init(): JSX.Element {
   useTournamentInit()
   return null
+}
+
+//** load the latest unfinished tournament */
+export function useTournamentInit() {
+  const store = useTournamentDb()
+  const navigate = useNavigate()
+
+  onMount(async () => {
+    const dbTournaments = await store.getPage()
+    const latestUnfinished = dbTournaments.find((t) => !t.finishedOn)
+    if (latestUnfinished) {
+      navigate(TOURNAMENT(latestUnfinished.id))
+    }
+  })
 }

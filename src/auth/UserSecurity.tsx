@@ -69,6 +69,10 @@ export default function UserSecurity() {
           Update Password
         </Button>
       </form>
+
+      <Button class="mt-2" onclick={() => supabase.auth.signOut()}>
+        Logout
+      </Button>
     </div>
   )
 }

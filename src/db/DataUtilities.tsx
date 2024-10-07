@@ -2,8 +2,6 @@ import { unwrap } from 'solid-js/store'
 import { Button, TextInput as Input } from '../components'
 import { usePlayerStore } from '../players/context'
 import { useTournamentStore } from '../tournaments/context'
-import { useTournamentsClassic } from '../tournaments/hooks'
-import { toast } from 'solid-toast'
 import { keyBy, mapValues } from 'lodash'
 import { FinishedRound } from '../tournaments/types'
 

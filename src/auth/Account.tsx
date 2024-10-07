@@ -1,6 +1,7 @@
 import { AuthSession } from '@supabase/supabase-js'
 import { createEffect, createSignal, type JSX } from 'solid-js'
 import { supabase } from './supabase'
+import Avatar from './Avatar'
 
 interface Props {
   session: AuthSession

@@ -9,25 +9,19 @@ import { TextInput } from '../components/Forms'
 import { Player, Tournament, TournamentPlayer } from './types'
 import { init } from './model'
 
-import { useTournaments } from './hooks'
-import { last } from 'lodash'
 import { useTournamentStore } from './context'
 import { usePlayerStore } from '../players/context'
 
 import '@thisbeyond/solid-select/style.css'
 
-interface TournamentForm {
-  name: string
-}
-
 export default function NewTournamentsPage(): JSX.Element {
-  const [tournaments, isLoading] = useTournaments()
+  const store = useTournamentStore()
   return (
     <div class="p-8">
       <H1>New Tournament</H1>
 
-      <Show when={!isLoading()} fallback={<PageLoader />}>
-        <NewTournament previous={last(tournaments())} />
+      <Show when={!store.isLoading} fallback={<PageLoader />}>
+        <NewTournament previous={store.latest} />
       </Show>
     </div>
   )
@@ -100,10 +94,6 @@ export function NewTournament(props: { previous?: Tournament }): JSX.Element {
       return item.name
     },
   })
-
-  function handlePlayer(p: Player) {
-    console.log('handle', p)
-  }
 
   return (
     <form onsubmit={submit}>

@@ -1,99 +1,170 @@
-import { AuthSession } from '@supabase/supabase-js'
-import { type AppSupabaseClient } from '../auth/supabase'
-
-import { Database, Json } from '../db/schema'
 import { Tournament } from './types'
-import { deserialize, serialize } from './model'
+import { createStore, Store, type SetStoreFunction } from 'solid-js/store'
+import { TournamentDb } from './db'
+import { withRollback } from '../db/store'
+import { ReactiveMap } from '@solid-primitives/map'
+import { batch } from 'solid-js'
+import { first } from 'lodash'
 
-type TournamentTable = Database['public']['Tables']['tournaments']
-type TournamentRow = TournamentTable['Row']
+/*
+  Describe the relationship between the store, its signals, and its consumers
 
-const PAGE_SIZE = 50
+  - The store provides direct, read-only access to signals
+  - consumers read from signals, but do not write
+  - the store keeps a private reference to the signal setter-function
+  - the store provides write methods that make use of the private signal setter
+  - the's writer methods ALSO update the api-db
+    - the writers methods must therefore be async
+    - the writer methods should optimistically update the signals IF it can undo the write when the API call fails
+    - the writer methods should update the signals after API success IF it cannot easily undo the write when the API call fails
+  
+
+There are a few ways we can handle undo
+
+- solid-undo-redo, which keeps a list
+  - PRO: history list is linear
+  - PRO: history is observable
+  - CON: linear history cannot undo any commit except the last, so it can't undo -2 and leave -1
+- each operation keeps a copy of the previous state, but only the part that it is updating.
+  - PRO: memory is freed as soon as the operation commits, or after a delay to keep a short undo
+  - PRO: undo can come after other operations, allowing undo action -2 while leaving action -1
+  - CON: history is local, observing may be difficult.
+  - CON: undo might result in REDOING a different undo if there is overlap, since it kept state that was updated but undone
+
+
+I think the later option is better
+
+How this this be made easily re-usable?
+
+Create a function that takes in
+- the current state
+- the async fn that update the state
+
+There are three options for error handling
+1. the function is async and can be caught normally. This requires the caller to handle errors
+2. the function could return an object with an `onError` function that adds a handler. This allows the caller to not handle the error, relying on automatic rollback to handle errors.
+3. the function is async and can be caught normally, with a parameter to catch errors internally and not throw anything, giving normal async ergonomics with optional error handling
+
+
+I think the lost option is best. I have implemented it in : db/store/withRollback
+
+*/
+
+export type Tournaments = { [key: string]: Tournament }
+interface TournamentSignalStore {
+  tournaments: ReactiveMap<string, Tournament>
+  lastPageLoaded: number
+  isLoading: boolean
+}
 
 export class TournamentStore {
-  private userId: string
+  private store: Store<TournamentSignalStore>
+  private setStore: SetStoreFunction<TournamentSignalStore>
 
-  constructor(private supabase: AppSupabaseClient, private auth: AuthSession) {
-    this.userId = auth.user.id
+  constructor(private db: TournamentDb) {
+    this.db = db
+
+    const [store, setStore] = createStore({
+      tournaments: new ReactiveMap<string, Tournament>(),
+      lastPageLoaded: -1,
+      isLoading: false,
+    } as TournamentSignalStore)
+
+    this.store = store
+    this.setStore = setStore
+
+    this.loadMore().catch(() => console.error('tournament store init failed'))
   }
 
-  async getPage({
-    page = 0,
-    leagueId,
-  }: { page?: number; leagueId?: string } = {}): Promise<Tournament[]> {
-    let query = this.supabase.from('tournaments').select()
-
-    if (leagueId) query = query.eq('league_id', leagueId)
-    else query = query.is('league_id', null)
-
-    const { data, error } = await query
-      .order('created_at', { ascending: false })
-      .range(PAGE_SIZE * page, PAGE_SIZE * page + (PAGE_SIZE - 1))
-
-    if (error) throw error
-
-    return data.map(fromDb)
+  get tournaments() {
+    return Array.from(this.store.tournaments.values()) as Tournament[]
   }
 
-  async get(id: string): Promise<Tournament> {
-    const { data, error } = await this.supabase
-      .from('tournaments')
-      .select()
-      .eq('id', id)
+  get lastPageLoaded() {
+    return this.store.lastPageLoaded
+  }
 
-    if (error) throw error
-    assertSingle(data)
+  get isLoading() {
+    return this.store.isLoading
+  }
 
-    return fromDb(data[0])
+  get latest() {
+    const tournaments = this.tournaments
+    return tournaments.reduce((latest, current) => {
+      if (!latest) return current
+      return latest?.createdOn < current.createdOn ? current : latest
+    }, first(tournaments))
+  }
+
+  async loadMore(): Promise<void> {
+    const nextPage = this.lastPageLoaded + 1
+    this.setStore('isLoading', true)
+    try {
+      const page = await this.db.getPage({ page: nextPage })
+      batch(() => {
+        this.setStore({
+          lastPageLoaded: nextPage,
+          isLoading: false,
+        })
+        page.forEach((t) => this.store.tournaments.set(t.id, t))
+      })
+    } catch (e: any) {
+      this.setStore('isLoading', false)
+      console.error('next page loading', e)
+    }
+  }
+
+  get(tournamentId: string): Tournament | null {
+    return this.store.tournaments.get(tournamentId) ?? null
   }
 
   async create(tournament: Tournament): Promise<Tournament> {
-    const { data, error } = await this.supabase
-      .from('tournaments')
-      .insert({
-        user_id: this.userId,
-        data: serialize(tournament) as unknown as Json,
-      })
-      .select()
+    const result = await this.db.create(tournament)
 
-    if (error) throw error
-    assertSingle(data)
+    this.store.tournaments.set(result.id, result)
 
-    tournament.id = data[0].id
-
-    await this.update(tournament)
-
-    return tournament
+    return result
   }
 
   async update(tournament: Tournament): Promise<void> {
-    const { error } = await this.supabase
-      .from('tournaments')
-      .update({
-        data: serialize(tournament) as unknown as Json,
-      })
-      .eq('id', tournament.id)
+    const current = this.store.tournaments.get(tournament.id)
+    if (!current) {
+      throw Error('tournament not found, cannot update')
+    }
 
-    if (error) throw error
+    // try {
+    //   this.store.tournaments.set(tournament.id, tournament)
+    //   await this.db.update(tournament)
+    // } catch (e: any) {
+    //   this.store.tournaments.set(tournament.id, current)
+    //   throw e
+    // }
+
+    withRollback(
+      async () => {
+        this.store.tournaments.set(tournament.id, tournament)
+        await this.db.update(tournament)
+      },
+      async () => {
+        this.store.tournaments.set(tournament.id, current)
+      },
+    )
   }
 
-  async delete(id: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('tournaments')
-      .delete()
-      .eq('id', id)
+  async delete(tournamentId: string): Promise<void> {
+    const current = this.store.tournaments.get(tournamentId)
+    if (!current) {
+      throw Error('tournament not found, cannot update')
+    }
 
-    if (error) throw error
-  }
-}
-
-function fromDb(row: TournamentRow): Tournament {
-  return deserialize({ id: row.id, ...(row.data as any) })
-}
-
-function assertSingle(data: TournamentRow[], type = 'Select') {
-  if (data.length !== 1) {
-    console.error(`${type} bad result`, data)
-    throw new Error(`Period ${type} failed`)
+    withRollback(
+      async () => {
+        this.store.tournaments.delete(tournamentId)
+        await this.db.delete(tournamentId)
+      },
+      async () => {
+        this.store.tournaments.set(tournamentId, current)
+      },
+    )
   }
 }

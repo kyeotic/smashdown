@@ -8,8 +8,8 @@ import {
   onMount,
   createMemo,
 } from 'solid-js'
-import { filter, last, round, shuffle } from 'lodash'
-import { Button, H1, H2, TextInput, Modal, Label, H3 } from '../components'
+import { filter, last, shuffle } from 'lodash'
+import { Button, H1, H2, Modal, Label, H3 } from '../components'
 import RosterList from './RosterList'
 import {
   type Fighter,
@@ -32,11 +32,16 @@ import { unwrap } from 'solid-js/store'
 import FighterCard from './FighterCard'
 import { scrollToCenter } from '../util/dom'
 import { StatProvider, useStatContext } from './StatContext'
+import { useTournamentStore } from './context'
+import { useNavigate } from '@solidjs/router'
+import { HOME } from '../root/routes'
 
 export default function TournamentEdit(props: {
   tournament: Tournament
   onChange: (updated: Tournament) => void
 }): JSX.Element {
+  const store = useTournamentStore()
+  const navigate = useNavigate()
   return (
     <div class="max-w-xl mx-auto">
       <H1>{props.tournament.name}</H1>
@@ -48,6 +53,19 @@ export default function TournamentEdit(props: {
           <TournamentPlay {...props} />
         </Match>
       </Switch>
+
+      <Button
+        class="mt-8"
+        danger
+        onclick={() => {
+          if (window.confirm('Delete tournament? This cannot be undone')) {
+            store.delete(props.tournament.id)
+            navigate(HOME)
+          }
+        }}
+      >
+        Delete
+      </Button>
     </div>
   )
 }
@@ -277,7 +295,6 @@ function TournamentRound(props: {
   function revert() {
     const finished = getFinishedRounds(props.tournament)
     const isPrevious = props.round === finished[finished.length - 1]
-    console.log('reverting', isPrevious)
     if (!isPrevious) return
     props.onChange({
       ...props.tournament,
@@ -338,7 +355,10 @@ function TournamentRound(props: {
                 {(s) => (
                   <span class="flex-0 text-md lg:text-xl font-medium">
                     {s()?.wins}/{s()?.games} (
-                    {((s()?.wins / s()?.games) * 100).toFixed(2)}%)
+                    {s()?.games === 0
+                      ? 0
+                      : ((s()?.wins / s()?.games) * 100).toFixed(2)}
+                    %)
                   </span>
                 )}
               </Show>

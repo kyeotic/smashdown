@@ -1,17 +1,23 @@
 import { Show, Suspense } from 'solid-js'
-import { H1 } from '../components'
+import { H1, PageLoader } from '../components'
 import { useTournament } from './hooks'
 import TournamentEdit from './Tournament'
 import { useParams } from '@solidjs/router'
+import { useTournamentStore } from './context'
+import { Tournament } from './types'
 
 export default function TournamentPage() {
   const { id } = useParams()
-  const [tournament, onChange] = useTournament(id)
+  // const [tournament, onChange] = useTournament(id)
+  const store = useTournamentStore()
+
+  const tournament = () => store.get(id)
+  async function onChange(t: Tournament): Promise<void> {
+    await store.update(t)
+  }
   return (
-    <Suspense fallback={<span>loading</span>}>
-      <Show when={tournament()} fallback={<H1>Not Found</H1>}>
-        <TournamentEdit tournament={tournament()!} onChange={onChange} />
-      </Show>
-    </Suspense>
+    <Show when={!store.isLoading} fallback={<PageLoader />}>
+      <TournamentEdit tournament={tournament()!} onChange={onChange} />
+    </Show>
   )
 }
