@@ -35,6 +35,8 @@ import { StatProvider, useStatContext } from './StatContext'
 import { useTournamentStore } from './context'
 import { useNavigate } from '@solidjs/router'
 import { HOME } from '../root/routes'
+import { PlayerContext, PlayerProvider } from '../players/context'
+import { StatSummary } from './StatSummary'
 
 export default function TournamentEdit(props: {
   tournament: Tournament
@@ -220,10 +222,10 @@ function TournamentPlay(props: {
                 : 'bg-slate-400'
             }
             return (
-              <>
+              <PlayerProvider player={player}>
                 <H3 class="mt-8">{player.name}'s Roster</H3>
                 <RosterList roster={player.roster} fighterClass={bg} />
-              </>
+              </PlayerProvider>
             )
           }}
         </For>
@@ -351,17 +353,7 @@ function TournamentRound(props: {
                 fighter={player.fighter}
                 onClick={() => onClick(player.player)}
               />
-              <Show when={player.stats}>
-                {(s) => (
-                  <span class="flex-0 text-md lg:text-xl font-medium">
-                    {s()?.wins}/{s()?.games} (
-                    {s()?.games === 0
-                      ? 0
-                      : ((s()?.wins / s()?.games) * 100).toFixed(2)}
-                    %)
-                  </span>
-                )}
-              </Show>
+              <StatSummary stats={player.stats} />
             </div>
           )
         }}

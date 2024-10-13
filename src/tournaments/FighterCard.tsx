@@ -1,8 +1,11 @@
-import { type JSX, mergeProps } from 'solid-js'
+import { createMemo, createSignal, type JSX, mergeProps, Show } from 'solid-js'
 import classnames from 'classnames'
 import { Fighter } from './types'
 
 import { noop } from '../util/functions'
+import { usePlayer } from '../players/context'
+import { useStatContext } from './StatContext'
+import { StatSummary } from './StatSummary'
 
 export default function FighterCard(props: {
   class?: string
@@ -10,10 +13,26 @@ export default function FighterCard(props: {
   onClick?: (f: Fighter) => void
 }): JSX.Element {
   let name: HTMLElement | undefined
+  const player = usePlayer()
+  const ctxStats = useStatContext(true)
+
+  const [showStats, setShowStats] = createSignal<boolean>(false)
+  const onclick =
+    player!! && ctxStats()!!
+      ? function onclick() {
+          setShowStats((s) => !s)
+        }
+      : noop
+
   const merged = mergeProps(
-    { onClick: noop, lost: false, class: 'bg-slate-400' },
+    { onClick: onclick, lost: false, class: 'bg-slate-400' },
     props,
   )
+
+  const stats = createMemo(() => {
+    if (!player || !ctxStats()) return null
+    return ctxStats()?.[player.id]?.record[props.fighter.id]
+  })
 
   return (
     <div
@@ -27,8 +46,11 @@ export default function FighterCard(props: {
         ref={name}
         class="text-center text-ellipsis basis-4 grow-0 shrink-0 font-medium text-[12px] md:text-sm lg:text-2xl"
       >
-        {props.fighter.name}
+        <Show when={!showStats()} fallback={<StatSummary stats={stats()!} />}>
+          {props.fighter.name}
+        </Show>
       </span>
+
       <img
         class=""
         src={`/images/smash-logos/${props.fighter.icon}`}

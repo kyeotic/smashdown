@@ -1,6 +1,7 @@
 import { createContext, type ParentProps, useContext, JSX } from 'solid-js'
 import { useAuth, useSupabase } from '../auth/SupabaseProvider'
 import { PlayerStore } from './store'
+import { Player } from '../tournaments/types'
 
 export const PlayerStoreContext = createContext<PlayerStore>()
 
@@ -24,5 +25,21 @@ export function PlayerStoreProvider(props: ParentProps): JSX.Element {
     <PlayerStoreContext.Provider value={store}>
       {props.children}
     </PlayerStoreContext.Provider>
+  )
+}
+
+export const PlayerContext = createContext<Player>()
+
+export function usePlayer(): Player | undefined {
+  return useContext(PlayerContext)
+}
+
+export function PlayerProvider(
+  props: ParentProps & { player: Player },
+): JSX.Element {
+  return (
+    <PlayerContext.Provider value={props.player}>
+      {props.children}
+    </PlayerContext.Provider>
   )
 }

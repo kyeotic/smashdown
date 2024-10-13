@@ -31,13 +31,18 @@ export interface TournamentStats {
 
 export const StatProviderContext = createContext<Accessor<TournamentStats>>()
 
-export function useStatContext(): Accessor<TournamentStats> {
+export function useStatContext(): Accessor<TournamentStats>
+export function useStatContext(
+  allowMissing: boolean = false,
+): Accessor<TournamentStats | undefined> {
   const ctx = useContext(StatProviderContext)
 
-  if (!ctx)
+  if (!ctx) {
+    if (allowMissing) return () => undefined
     throw new Error(
       'useStatContext must be used within a StatProvider.Provider',
     )
+  }
 
   return ctx
 }
@@ -50,19 +55,25 @@ export function StatProvider(
   const ctx = createMemo<TournamentStats>(() => {
     if (store.isLoading) return {}
 
-    const playersStats = props.tournament.players.reduce((players, p) => {
-      players[p.id] = {
-        id: p.id,
-        record: p.roster.reduce((stats, fighter) => {
-          stats[fighter.id] = {
-            games: 0,
-            wins: 0,
-          }
-          return stats
-        }, {} as { [fighterId: string]: FighterStats }),
-      }
-      return players
-    }, {} as { [playerId: string]: PlayerStats })
+    const playersStats = props.tournament.players.reduce(
+      (players, p) => {
+        players[p.id] = {
+          id: p.id,
+          record: p.roster.reduce(
+            (stats, fighter) => {
+              stats[fighter.id] = {
+                games: 0,
+                wins: 0,
+              }
+              return stats
+            },
+            {} as { [fighterId: string]: FighterStats },
+          ),
+        }
+        return players
+      },
+      {} as { [playerId: string]: PlayerStats },
+    )
     const playerIds = props.tournament.players.map((p) => p.id)
 
     store.tournaments.forEach((tournament) => {
