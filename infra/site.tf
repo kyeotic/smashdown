@@ -1,30 +1,47 @@
 resource "aws_s3_bucket" "site" {
   bucket = local.site_domain
   acl    = "private"
-
-  policy = <<EOF
-{
-      "Id": "bucket_policy_site",
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Sid": "bucket_policy_site_main",
-          "Action": [
-            "s3:GetObject"
-          ],
-          "Effect": "Allow",
-          "Resource": "arn:aws:s3:::${local.site_domain}/*",
-          "Principal": "*"
-        }
-      ]
-    }
-EOF
-
-
   website {
     index_document = "index.html"
     error_document = "error.html"
   }
+}
+
+resource "aws_s3_bucket_policy" "site" {
+  bucket     = aws_s3_bucket.site.id
+  depends_on = [aws_s3_bucket_public_access_block.site]
+  policy     = data.aws_iam_policy_document.s3_bucket_policy.json
+}
+
+data "aws_iam_policy_document" "s3_bucket_policy" {
+  statement {
+    sid = "1"
+
+    actions = [
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.site_domain}/*",
+    ]
+
+    principals {
+      type = "AWS"
+
+      identifiers = [
+        aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn,
+      ]
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 resource "aws_cloudfront_distribution" "site" {
@@ -33,17 +50,11 @@ resource "aws_cloudfront_distribution" "site" {
   price_class     = "PriceClass_100"
 
   origin {
-    origin_id = "origin-bucket-${aws_s3_bucket.site.id}"
+    domain_name = aws_s3_bucket.site.bucket_regional_domain_name
+    origin_id   = "s3-cloudfront"
 
-    domain_name = aws_s3_bucket.site.website_endpoint
-
-    # domain_name = "${local.site_domain}.s3.amazonaws.com"
-
-    custom_origin_config {
-      origin_protocol_policy = "http-only"
-      http_port              = "80"
-      https_port             = "443"
-      origin_ssl_protocols   = ["SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"]
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
     }
   }
 
@@ -76,7 +87,7 @@ resource "aws_cloudfront_distribution" "site" {
     min_ttl          = "0"
     default_ttl      = "300"
     max_ttl          = "1200"
-    target_origin_id = "origin-bucket-${aws_s3_bucket.site.id}"
+    target_origin_id = "s3-cloudfront"
 
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
@@ -97,10 +108,9 @@ resource "aws_cloudfront_distribution" "site" {
     min_ttl          = "0"
     default_ttl      = "0"
     max_ttl          = "0"
-    target_origin_id = "origin-bucket-${aws_s3_bucket.site.id}"
+    target_origin_id = "s3-cloudfront"
     path_pattern     = "/index.html"
 
-    // This redirects any HTTP request to HTTPS. Security first!
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
   }
@@ -118,4 +128,10 @@ resource "aws_cloudfront_distribution" "site" {
       restriction_type = "none"
     }
   }
+
+  wait_for_deployment = false
+}
+
+resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
+  comment = "access-identity-${local.site_domain}.s3.amazonaws.com"
 }
