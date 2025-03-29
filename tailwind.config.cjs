@@ -1,13 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx,css,md,mdx,html,json,scss}',
+    './src/public/index.html',
+    './src/client/**/*.{js,ts,jsx,tsx,css,md,mdx,html,json,scss}',
   ],
-  safelist: [{ pattern: /grid-cols-.+/ }],
+  // safelist: [{ pattern: /grid-cols-./ }],
+
   darkMode: 'class',
   theme: {
     extend: {},
   },
+  // variants: {
+  //   opacity: ({ after }) => after(['disabled']),
+  // },
   plugins: [require('@tailwindcss/forms'), require('tailwindcss-safe-area')],
 }
