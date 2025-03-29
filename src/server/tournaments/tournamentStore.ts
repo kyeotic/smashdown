@@ -7,7 +7,7 @@ export default class TournamentStore {
   constructor(private readonly kv: Deno.Kv) {}
 
   async getForUser(userId: string): Promise<Tournament[]> {
-    return await listAllValues(this.kv, TOURNAMENTS(userId))
+    return await listAllValues(this.kv, TOURNAMENTS(userId), { reverse: true })
   }
 
   async put(userId: string, tournament: Tournament): Promise<Tournament> {

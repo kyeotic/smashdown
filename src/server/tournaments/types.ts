@@ -8,7 +8,7 @@ export const TournamentPlayerSchema = PlayerSchema.extend({
 export type TournamentPlayer = z.infer<typeof TournamentPlayerSchema>
 
 export const TournamentSchema = z.object({
-  id: z.string(),
+  id: z.string().ulid(),
   name: z.string(),
   createdOn: z.coerce.date(),
   updatedOn: z.coerce.date(),

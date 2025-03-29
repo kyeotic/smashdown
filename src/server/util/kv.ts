@@ -5,8 +5,9 @@ export function makeSet(name: string) {
 export async function listAllValues<T>(
   kv: Deno.Kv,
   prefix: string[],
+  { reverse = false }: { reverse?: boolean } = {},
 ): Promise<T[]> {
-  const entries = await Array.fromAsync(kv.list({ prefix }))
+  const entries = await Array.fromAsync(kv.list({ prefix }, { reverse }))
   return entries.map((e) => e.value as T)
 }
 

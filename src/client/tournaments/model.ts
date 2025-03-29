@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid'
+import { ulid } from '@std/ulid'
 import {
   Player,
   TournamentPlayer,
@@ -19,7 +19,7 @@ export function init(
   },
 ): Tournament {
   return TournamentSchema.parse({
-    id: init.id ?? nanoid(),
+    id: init.id ?? ulid(),
     name: init.name,
     createdOn: init.createdOn ?? new Date(),
     startedOn: init.startedOn,

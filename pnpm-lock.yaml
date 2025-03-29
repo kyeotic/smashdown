@@ -17,6 +17,9 @@ importers:
       '@solidjs/router':
         specifier: ^0.15.3
         version: 0.15.3(solid-js@1.9.5)
+      '@std/ulid':
+        specifier: npm:@jsr/std__ulid@1.0.0-rc.4
+        version: '@jsr/std__ulid@1.0.0-rc.4'
       '@thisbeyond/solid-select':
         specifier: ^0.15.0
         version: 0.15.0(solid-js@1.9.5)
@@ -352,6 +355,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@jsr/std__ulid@1.0.0-rc.4':
+    resolution: {integrity: sha512-dJPkGZitKk31EOSyP64SAlTXdGPlzu4CXOBIYwq+0zSeATGMjB4ZVgGjrUqUp/YZEUah6XwX1WLc9krGHqQjPw==, tarball: https://npm.jsr.io/~/11/@jsr/std__ulid/1.0.0-rc.4.tgz}
 
   '@rollup/rollup-android-arm-eabi@4.37.0':
     resolution: {integrity: sha512-l7StVw6WAa8l3vA1ov80jyetOAEo1FtHvZDbzXDO/02Sq/QVvqlHkYoFwDJPIMj0GKiistsBudfx5tGFnwYWDQ==}
@@ -1175,6 +1181,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@jsr/std__ulid@1.0.0-rc.4': {}
 
   '@rollup/rollup-android-arm-eabi@4.37.0':
     optional: true
