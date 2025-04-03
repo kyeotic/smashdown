@@ -6,6 +6,7 @@ import { noop } from '../util/functions'
 import { usePlayer } from '../players/context'
 import { useStatContext } from './StatContext'
 import { StatSummary } from './StatSummary'
+import { bodyStyle } from '../components'
 
 export default function FighterCard(props: {
   class?: string
@@ -44,7 +45,9 @@ export default function FighterCard(props: {
     >
       <span
         ref={name}
-        class="text-center text-ellipsis basis-4 grow-0 shrink-0 font-medium text-[12px] md:text-sm lg:text-2xl"
+        class={bodyStyle(
+          'text-center text-ellipsis basis-4 grow-0 shrink-0 font-medium text-[12px] md:text-sm lg:text-2xl',
+        )}
       >
         <Show when={!showStats()} fallback={<StatSummary stats={stats()!} />}>
           {props.fighter.name}

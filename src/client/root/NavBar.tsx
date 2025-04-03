@@ -1,5 +1,6 @@
 import { A } from '@solidjs/router'
 import { PLAYERS, USER_PROFILE, UTIL } from './routes'
+import { ThemeToggle } from '../components'
 
 export default function NavBar() {
   return (
@@ -27,6 +28,7 @@ export default function NavBar() {
         <A href={PLAYERS}>
           <span class="flex-0 font-bold">Players</span>
         </A>
+        <ThemeToggle />
         <A href={USER_PROFILE}>
           <i class="fa-solid fa-user pr-2" />
           <span class="flex-0 font-bold">Profile</span>

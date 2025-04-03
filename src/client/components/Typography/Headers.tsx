@@ -1,12 +1,13 @@
 import classnames from 'classnames'
 import { splitProps, type JSX, type ParentProps } from 'solid-js'
+import { headerStyle } from './font'
 
-const headerBase = 'font-semibold mb-3'
+const headerBase = `font-semibold mb-3 ${headerStyle()}`
 
 export function H1(props: ParentProps & { class?: string }): JSX.Element {
   const [local, rest] = splitProps(props, ['class'])
   return (
-    <h1 class={classnames(local.class, 'text-4xl', headerBase)} {...rest} />
+    <h1 class={classnames('text-4xl', headerBase, local.class)} {...rest} />
   )
 }
 

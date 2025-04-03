@@ -9,7 +9,7 @@ import {
   createMemo,
 } from 'solid-js'
 import { filter, last, shuffle } from 'lodash'
-import { Button, H1, H2, Modal, Label, H3 } from '../components'
+import { Button, H1, H2, Modal, Label, H3, bodyStyle } from '../components'
 import RosterList from './RosterList'
 import {
   type Fighter,
@@ -346,7 +346,7 @@ function TournamentRound(props: {
         {(player) => {
           return (
             <div class="flex gap-0 flex-col">
-              <span class="flex-0 text-md lg:text-xl font-medium">
+              <span class={bodyStyle('flex-0 text-md lg:text-xl font-medium')}>
                 {player.player.name} ({rosterIndex(player)}/
                 {props.tournament.rosterSize})
               </span>

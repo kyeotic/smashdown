@@ -1,5 +1,6 @@
 import { type JSX, type ParentProps } from 'solid-js'
 import classnames from 'classnames'
+import { bodyStyle } from '../Typography/font'
 
 export default function Label(
   props: ParentProps & {
@@ -12,7 +13,8 @@ export default function Label(
     <label
       for={props.id}
       class={classnames(
-        'block text-gray-700 text-sm font-bold mb-2',
+        'block mb-2 text-sm font-medium text-gray-900 dark:text-white',
+        bodyStyle(),
         props.class,
       )}
     >

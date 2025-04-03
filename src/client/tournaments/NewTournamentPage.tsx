@@ -10,7 +10,6 @@ import { Player, Tournament, TournamentPlayer } from './types'
 import { init } from './model'
 
 import { useStores } from '../data/stores'
-import { usePlayerStore } from '../players/context'
 
 import '@thisbeyond/solid-select/style.css'
 

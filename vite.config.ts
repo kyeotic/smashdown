@@ -6,7 +6,7 @@ export default defineConfig({
   root: './src/client',
   publicDir: '../public',
   server: {
-    port: 3001,
+    port: 3000,
   },
   build: {
     target: 'esnext',
