@@ -12,5 +12,7 @@ export default {
     domain: auth0Domain,
     clientId: auth0ClientId,
     audience: 'kyeotek',
+    scope: 'openid profile email offline_access',
+    redirectUrl: `${window.location.protocol}//${window.location.host}`,
   },
 } as const
