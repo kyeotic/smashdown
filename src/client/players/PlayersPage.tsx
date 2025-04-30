@@ -42,7 +42,7 @@ export function NewPlayerForm(): JSX.Element {
 }
 
 export function PlayerList(): JSX.Element {
-  const store = usePlayerStore()
+  const { players: store } = useStores()
 
   return (
     <div>

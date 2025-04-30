@@ -37,6 +37,7 @@ import { HOME } from '../root/routes'
 import { PlayerProvider } from '../players/context'
 import { StatSummary } from './StatSummary'
 import { useStores } from '../data/stores'
+import { RoundProvider, TournamentProvider } from './context'
 
 const GRID_COLS = ['grid-cols-2']
 
@@ -194,45 +195,47 @@ function TournamentPlay(props: {
   onChange: (updated: Tournament) => void
 }): JSX.Element {
   return (
-    <StatProvider tournament={props.tournament}>
-      <div class="mt-8">
-        <H2>Rounds</H2>
+    <TournamentProvider tournament={props.tournament}>
+      <StatProvider tournament={props.tournament}>
+        <div class="mt-8">
+          <H2>Rounds</H2>
 
-        <For each={props.tournament.rounds}>
-          {(round) => (
-            <TournamentRound
-              round={round}
-              tournament={props.tournament}
-              onChange={props.onChange}
-            />
-          )}
-        </For>
+          <For each={props.tournament.rounds}>
+            {(round) => (
+              <TournamentRound
+                round={round}
+                tournament={props.tournament}
+                onChange={props.onChange}
+              />
+            )}
+          </For>
 
-        <Show when={hasFinished(props.tournament)}>
-          <>
-            <H2>Winner: {props.tournament.winner?.name}</H2>
-          </>
-        </Show>
+          <Show when={hasFinished(props.tournament)}>
+            <>
+              <H2>Winner: {props.tournament.winner?.name}</H2>
+            </>
+          </Show>
 
-        <For each={props.tournament.players}>
-          {(player) => {
-            function bg(f: Fighter): string {
-              return getLostRoster(player, props.tournament).some(
-                (l) => l.id === f.id,
+          <For each={props.tournament.players}>
+            {(player) => {
+              function bg(f: Fighter): string {
+                return getLostRoster(player, props.tournament).some(
+                  (l) => l.id === f.id,
+                )
+                  ? 'bg-red-400'
+                  : 'bg-slate-400'
+              }
+              return (
+                <PlayerProvider player={player}>
+                  <H3 class="mt-8">{player.name}'s Roster</H3>
+                  <RosterList roster={player.roster} fighterClass={bg} />
+                </PlayerProvider>
               )
-                ? 'bg-red-400'
-                : 'bg-slate-400'
-            }
-            return (
-              <PlayerProvider player={player}>
-                <H3 class="mt-8">{player.name}'s Roster</H3>
-                <RosterList roster={player.roster} fighterClass={bg} />
-              </PlayerProvider>
-            )
-          }}
-        </For>
-      </div>
-    </StatProvider>
+            }}
+          </For>
+        </div>
+      </StatProvider>
+    </TournamentProvider>
   )
 }
 
@@ -243,6 +246,7 @@ function TournamentRound(props: {
 }): JSX.Element {
   let container: HTMLDivElement | undefined
   const ctxStats = useStatContext()
+  const isCurrentRound = createMemo(() => isFinished(props.round))
 
   onMount(() => {
     if (
@@ -345,18 +349,22 @@ function TournamentRound(props: {
       <For each={players()}>
         {(player) => {
           return (
-            <div class="flex gap-0 flex-col">
-              <span class={bodyStyle('flex-0 text-md lg:text-xl font-medium')}>
-                {player.player.name} ({rosterIndex(player)}/
-                {props.tournament.rosterSize})
-              </span>
-              <FighterCard
-                class={getClass(player.player)}
-                fighter={player.fighter}
-                onClick={() => onClick(player.player)}
-              />
-              <StatSummary stats={player.stats} />
-            </div>
+            <RoundProvider round={props.round}>
+              <div class="flex gap-0 flex-col">
+                <span
+                  class={bodyStyle('flex-0 text-md lg:text-xl font-medium')}
+                >
+                  {player.player.name} ({rosterIndex(player)}/
+                  {props.tournament.rosterSize})
+                </span>
+                <FighterCard
+                  class={getClass(player.player)}
+                  fighter={player.fighter}
+                  onClick={() => onClick(player.player)}
+                />
+                <StatSummary stats={player.stats} />
+              </div>
+            </RoundProvider>
           )
         }}
       </For>

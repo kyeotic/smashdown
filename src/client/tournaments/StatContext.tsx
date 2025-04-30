@@ -10,6 +10,7 @@ import { FinishedRound, Tournament } from './types'
 import { useStores } from '../data/stores'
 
 export interface FighterStats {
+  id: string
   games: number
   wins: number
 }
@@ -58,6 +59,7 @@ export function StatProvider(
           record: p.roster.reduce(
             (stats, fighter) => {
               stats[fighter.id] = {
+                id: fighter.id,
                 games: 0,
                 wins: 0,
               }
