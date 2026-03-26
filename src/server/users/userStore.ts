@@ -1,11 +1,8 @@
 import { differenceBy } from 'lodash'
-import { listAllValues, makeSet } from '../util/kv.ts'
-import { Token } from '@kyeotic/server'
-import config from '../config.ts'
+import { listAllValues, makeKey, kvCreate, kvPut } from '../util/kv'
+import type { JWTPayload } from 'jose'
 import { nanoid } from 'nanoid'
 
-const USERS = makeSet('USERS')
-const EXT_ID = makeSet('EX_ID') // external identifier
 const AUTH0_SOURCE = 'auth0-kyeotek'
 
 export interface User {
@@ -24,43 +21,31 @@ interface ExternalIdRef {
 }
 
 export default class UserStore {
-  constructor(private readonly kv: Deno.Kv) {}
+  constructor(private readonly kv: KVNamespace) {}
 
-  // TODO: replace this with a paging function
   async getAll(): Promise<User[]> {
-    return await listAllValues(this.kv, USERS())
+    return await listAllValues<User>(this.kv, 'USERS:')
   }
 
   async create(user: User): Promise<User> {
     if (!user.id) throw new Error('id is required')
     validateExternals(user)
 
-    const key = USERS(user.id)
-    const existing = await this.kv.get(key)
+    const key = makeKey('USERS', user.id)
+    await kvCreate(this.kv, key, user)
 
-    if (existing?.versionstamp) {
-      throw new Error('User already exists')
-    }
-
-    const txn = this.kv
-      .atomic()
-      .check({ key, versionstamp: null })
-      .set(key, user)
-
-    user.externalIds?.forEach((e) => {
-      txn.set(EXT_ID(e.source, e.id), { userId: user.id } as ExternalIdRef)
-    })
-
-    await txn.commit()
+    await Promise.all(
+      (user.externalIds ?? []).map((e) =>
+        kvPut<ExternalIdRef>(this.kv, makeKey('EX_ID', e.source, e.id), { userId: user.id }),
+      ),
+    )
 
     return user
   }
 
-  async initUser(token: Token): Promise<User> {
-    if (token.iss !== config.auth.issuer)
-      throw new Error('Unsupported external source')
-
+  async initUser(token: JWTPayload): Promise<User> {
     const externalId = token.sub
+    if (!externalId) throw new Error('Token missing sub claim')
 
     const dbUser = await this.getByExternalIdentifier(AUTH0_SOURCE, externalId)
     if (dbUser) return dbUser
@@ -79,58 +64,44 @@ export default class UserStore {
     if (!user.id) throw new Error('id is required')
     validateExternals(user)
 
-    const key = USERS(user.id)
-    const existing = await this.kv.get(key)
+    const key = makeKey('USERS', user.id)
+    const existing = await this.kv.get<User>(key, 'json')
 
-    if (!existing.value) {
+    if (!existing) {
       throw new Error('User not found')
     }
 
-    const txn = await this.kv.atomic().check(existing).set(key, user)
+    await kvPut(this.kv, key, user)
 
-    // create new externals
-    differenceBy(
+    const newExternals = differenceBy(
       user.externalIds ?? [],
-      (existing.value as User).externalIds ?? [],
-    ).forEach((e) => setExternal(txn, e, user))
-
-    // delete old externals
-    differenceBy(
+      existing.externalIds ?? [],
+      (e) => `${e.source}:${e.id}`,
+    )
+    const removedExternals = differenceBy(
+      existing.externalIds ?? [],
       user.externalIds ?? [],
-      (existing.value as User).externalIds ?? [],
-    ).forEach((e) => deleteExternal(txn, e))
+      (e) => `${e.source}:${e.id}`,
+    )
 
-    await txn.commit()
+    await Promise.all([
+      ...newExternals.map((e) =>
+        kvPut<ExternalIdRef>(this.kv, makeKey('EX_ID', e.source, e.id), { userId: user.id }),
+      ),
+      ...removedExternals.map((e) => this.kv.delete(makeKey('EX_ID', e.source, e.id))),
+    ])
 
     return user
   }
 
-  async getByExternalIdentifier(
-    source: string,
-    externalId: string,
-  ): Promise<User | null> {
-    const dbId = await this.kv.get(EXT_ID(source, externalId))
-    if (!dbId.value) return null
+  async getByExternalIdentifier(source: string, externalId: string): Promise<User | null> {
+    const ref = await this.kv.get<ExternalIdRef>(makeKey('EX_ID', source, externalId), 'json')
+    if (!ref) return null
 
-    const user = await this.kv.get(USERS((dbId.value as ExternalIdRef).userId))
-
-    return (user.value as User) ?? null
+    return await this.kv.get<User>(makeKey('USERS', ref.userId), 'json')
   }
 }
 
 function validateExternals(user: User) {
-  if ((user.externalIds?.length ?? 0) > 5)
-    throw new Error('Max of 5 external ids')
-}
-
-function setExternal(
-  txn: Deno.AtomicOperation,
-  external: ExternalId,
-  user: User,
-) {
-  txn.set(EXT_ID(external.source, external.id), { userId: user.id })
-}
-
-function deleteExternal(txn: Deno.AtomicOperation, external: ExternalId) {
-  txn.delete(EXT_ID(external.source, external.id))
+  if ((user.externalIds?.length ?? 0) > 5) throw new Error('Max of 5 external ids')
 }

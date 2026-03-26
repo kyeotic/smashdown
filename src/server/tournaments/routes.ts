@@ -1,6 +1,6 @@
 import z from 'zod'
-import { router, authProcedure } from '../trpc.ts'
-import { TournamentSchema } from './types.ts'
+import { router, authProcedure } from '../trpc'
+import { TournamentSchema } from './types'
 
 export const tournamentRouter = router({
   getAll: authProcedure.query(async ({ ctx: { user, stores } }) => {

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PlayerSchema } from '../players/types.ts'
+import { PlayerSchema } from '../players/types'
 
 export const TournamentPlayerSchema = PlayerSchema.extend({
   roster: z.array(z.string()),

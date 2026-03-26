@@ -1,16 +1,14 @@
-import { listAllValues, create, makeSet } from '../util/kv.ts'
-import { Player } from './types.ts'
-
-const PLAYERS = makeSet('PLAYERS')
+import { listAllValues, makeKey, kvCreate } from '../util/kv'
+import { Player } from './types'
 
 export default class PlayerStore {
-  constructor(private readonly kv: Deno.Kv) {}
+  constructor(private readonly kv: KVNamespace) {}
 
   async getForUser(userId: string): Promise<Player[]> {
-    return await listAllValues(this.kv, PLAYERS(userId))
+    return await listAllValues<Player>(this.kv, makeKey('PLAYERS', userId) + ':')
   }
 
   async create(userId: string, player: Player): Promise<Player> {
-    return await create(this.kv, PLAYERS(userId, player.id), player)
+    return await kvCreate(this.kv, makeKey('PLAYERS', userId, player.id), player)
   }
 }

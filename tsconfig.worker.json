@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext"],
+    "strict": true,
+    "noEmit": true,
+    "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["src/server/**/*"],
+  "exclude": [
+    "src/server/server.ts",
+    "src/server/util/migrate-db.ts",
+    "src/server/util/migrate-date.ts",
+    "src/server/util/lazy.ts"
+  ]
+}
